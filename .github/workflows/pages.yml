@@ -94,7 +94,7 @@ jobs:
               if not file.exists(): return m.group(0)
               stamp=sha256(file.read_bytes()).hexdigest()[:12]
               return f'{asset}?v={stamp}'
-          s=re.sub(r'(workouts-tabs-n\.css|exercise-instruction-coverage\.js)\?v=\d+',bust,s)
+          s=re.sub(r'(workouts-tabs-n\.css|exercise-instruction-coverage\.js|progress-compact\.css|progress-compact\.js)\?v=\d+',bust,s)
 
           banner = """<aside style="position:relative;z-index:99999;background:#092d30;color:#f9d9a0;border-bottom:1px solid #c3a76f;padding:8px 13px;text-align:center;font:600 12px system-ui">TEST BUILD · No cloud connections. Use demo workouts only. Changes here do not affect your live app.</aside>"""
           s=s.replace('<body>','<body>\n'+banner,1)
@@ -110,6 +110,8 @@ jobs:
           test -s _site/integrated-workout/progress-compact.css
           grep -q 'recent-item:nth-child(n+6)' _site/integrated-workout/progress-compact.css
           grep -q "progress-compact.js" _site/integrated-workout/index.html
+          grep -Eq 'progress-compact.js\\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
+          grep -Eq 'progress-compact.css\\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
           grep -q 'background:#04252d!important' _site/integrated-workout/workouts-tabs-n.css
           grep -q 'const groups=new Map()' _site/integrated-workout/exercise-instruction-coverage.js
           grep -q 'exercise-instruction-coverage.js?v=' _site/integrated-workout/index.html
