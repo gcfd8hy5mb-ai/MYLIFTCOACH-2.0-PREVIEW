@@ -54,9 +54,7 @@ jobs:
           test -s replacement-candidate-src/active-exercise-guide.js
           test -s replacement-candidate-src/coach-periodization.js
           test -s replacement-candidate-src/sync/aux-data.js
-          node replacement-candidate-src/tests/replacement-media-merge.test.cjs
-          node replacement-candidate-src/tests/coach-program-cloud-backup.test.cjs
-          node --check replacement-candidate-src/app.js
+          (cd replacement-candidate-src && node tests/replacement-media-merge.test.cjs && node tests/coach-program-cloud-backup.test.cjs && node --check app.js)
 
       - name: Validate Coach candidate before packaging
         shell: bash
