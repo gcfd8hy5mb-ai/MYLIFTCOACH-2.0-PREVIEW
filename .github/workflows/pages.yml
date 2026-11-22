@@ -57,7 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           cd source-app
-          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs tests/exercise-instruction-depth.test.cjs tests/progress-compact.test.cjs tests/progress-real-volume.test.cjs
+          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs tests/exercise-instruction-depth.test.cjs tests/progress-compact.test.cjs tests/progress-real-volume.test.cjs tests/preview-persistence.test.cjs
           node --check exercise-instruction-depth.js
           node --check progress-compact.js
           node --check active-exercise-guide.js
@@ -82,6 +82,8 @@ jobs:
           mkdir -p _site/integrated-workout
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=preview --exclude=standalone-preview-template --exclude=node_modules source-app/ _site/integrated-workout/
           cp preview-guest-backup.js _site/integrated-workout/
+          node --check preview-guest-backup.js
+          grep -Fq 'Test saving across visits' preview-guest-backup.js
           python3 - <<'PY'
           from pathlib import Path
           p=Path('_site/integrated-workout/index.html')
@@ -102,7 +104,7 @@ jobs:
 
           banner = """<aside style="position:relative;z-index:99999;background:#092d30;color:#f9d9a0;border-bottom:1px solid #c3a76f;padding:8px 13px;text-align:center;font:600 12px system-ui">TEST BUILD · PROGRESS TABS V2 · Local Safari demo storage only. Live app unchanged.</aside>"""
           s=s.replace('<body>','<body>\n'+banner+'\n<section id="mlc-preview-persistence" style="position:relative;z-index:99999;background:#072e33;padding:12px;text-align:center;border-bottom:1px solid #9c865b"></section>',1)
-          s=s.replace('</body>','<script defer src="./preview-guest-backup.js?v=1"></script>\n</body>',1)
+          s=s.replace('</body>','<script defer src="./preview-guest-backup.js?v=2"></script>\n</body>',1)
           p.write_text(s)
           PY
           grep -q "connect-src 'none'" _site/integrated-workout/index.html
@@ -114,6 +116,7 @@ jobs:
           test -s _site/integrated-workout/progress-compact.js
           test -s _site/integrated-workout/progress-compact.css
           test -s _site/integrated-workout/preview-guest-backup.js
+          grep -Fq 'Test saving across visits' _site/integrated-workout/preview-guest-backup.js
           grep -q 'mlc-preview-persistence' _site/integrated-workout/index.html
           grep -q 'training volume' _site/integrated-workout/progress-migration.js
           grep -q "source:'empty'" _site/integrated-workout/workout-active-ux.js
@@ -185,7 +188,8 @@ jobs:
               && grep -Fq "source:'empty'" "$tmp/integrated-workout_workout-active-ux.js" \
               && grep -Fq 'volumeTotal(x.sets)' "$tmp/integrated-workout_app.js" \
               && grep -Fq 'function renderVolumeAudit(' "$tmp/integrated-workout_progress-migration.js" \
-              && grep -Fq 'Save demo backup' "$tmp/integrated-workout_preview-guest-backup.js"; then
+              && grep -Fq 'Save demo backup' "$tmp/integrated-workout_preview-guest-backup.js" \
+              && grep -Fq 'Test saving across visits' "$tmp/integrated-workout_preview-guest-backup.js"; then
               echo "Published integrated Progress V2 and exercise guide verified: ${url}integrated-workout/"
               exit 0
             fi
