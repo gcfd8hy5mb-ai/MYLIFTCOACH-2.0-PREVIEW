@@ -58,6 +58,9 @@ jobs:
           set -euo pipefail
           cd source-app
           node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs tests/exercise-instruction-depth.test.cjs tests/progress-compact.test.cjs
+          node --check exercise-instruction-depth.js
+          node --check progress-compact.js
+          node --check active-exercise-guide.js
           test -s assets/image-coming-approved.webp
           test -s active-exercise-guide.css
           test -s active-exercise-guide.js
