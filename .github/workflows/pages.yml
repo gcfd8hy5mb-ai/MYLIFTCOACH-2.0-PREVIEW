@@ -53,6 +53,21 @@ jobs:
           ref: feature/344-approved-exercise-visuals
           path: source-app
           persist-credentials: false
+      - name: Check out isolated redesign integration branch
+        uses: actions/checkout@v4
+        with:
+          repository: gcfd8hy5mb-ai/workout-tracker
+          ref: feature/myliftcoach2-full-integration
+          path: redesign-app
+          persist-credentials: false
+      - name: Validate redesign integration shell
+        run: |
+          set -euo pipefail
+          node --check redesign-app/integrations/mlc2/redesign-bridge.js
+          node --check redesign-app/integrations/mlc2/coach-program-builder.js
+          grep -Fq 'id="mlc2IntegrationScreen"' redesign-app/index.html
+          grep -Fq 'navMLC2Integration' redesign-app/index.html
+          test -s redesign-app/integrations/mlc2/exercise-catalog-344.js
       - name: Validate actual app image and exercise guide integration
         run: |
           set -euo pipefail
@@ -83,6 +98,13 @@ jobs:
           # Exclude repository metadata and automation files.
           mkdir -p _site/integrated-workout
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=preview --exclude=standalone-preview-template --exclude=node_modules source-app/ _site/integrated-workout/
+          # Publish the actual approved redesign branch at a separate test path.
+          # Never publish to the original workout-tracker GitHub Pages root.
+          mkdir -p _site/redesign-integrated
+          rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules redesign-app/ _site/redesign-integrated/
+          test -s _site/redesign-integrated/index.html
+          test -s _site/redesign-integrated/integrations/mlc2/redesign-bridge.js
+          test -s _site/redesign-integrated/integrations/mlc2/coach-program-builder.js
           cp preview-guest-backup.js _site/integrated-workout/
           node --check preview-guest-backup.js
           grep -Fq 'Test saving across visits' preview-guest-backup.js
@@ -145,6 +167,17 @@ jobs:
           grep -q 'const groups=new Map()' _site/integrated-workout/exercise-instruction-coverage.js
           grep -q 'exercise-instruction-coverage.js?v=' _site/integrated-workout/index.html
 
+          # Disallow cloud writes, form submissions and external API calls from
+          # this isolated public test origin; the existing live app is unchanged.
+          python3 - <<'PYMLC2'
+          from pathlib import Path
+          p=Path('_site/redesign-integrated/index.html')
+          html=p.read_text()
+          rule = """<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">"""
+          assert '<head>' in html
+          p.write_text(html.replace('<head>','<head>\n'+rule,1))
+          PYMLC2
+          grep -Fq "connect-src 'none'" _site/redesign-integrated/index.html
           touch _site/.nojekyll
       - name: Upload exact Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -176,7 +209,7 @@ jobs:
           # closes stdout early and triggers curl 23 under pipefail.
           for i in 1 2 3 4 5; do
             success=true
-            for file in index.html exercise-guide-demo.html exercise-guide-demo.js integrated-workout/index.html integrated-workout/active-exercise-guide.js integrated-workout/workouts-tabs-n.css integrated-workout/exercise-instruction-coverage.js integrated-workout/exercise-instruction-depth.js integrated-workout/progress-compact.js integrated-workout/progress-compact.css integrated-workout/preview-guest-backup.js integrated-workout/coach-plan-preview.js integrated-workout/coach-program-builder.js integrated-workout/coach-readiness.js integrated-workout/progress-migration.js integrated-workout/workout-active-ux.js integrated-workout/app.js; do
+            for file in index.html exercise-guide-demo.html exercise-guide-demo.js integrated-workout/index.html integrated-workout/active-exercise-guide.js integrated-workout/workouts-tabs-n.css integrated-workout/exercise-instruction-coverage.js integrated-workout/exercise-instruction-depth.js integrated-workout/progress-compact.js integrated-workout/progress-compact.css integrated-workout/preview-guest-backup.js integrated-workout/coach-plan-preview.js integrated-workout/coach-program-builder.js integrated-workout/coach-readiness.js redesign-integrated/index.html redesign-integrated/integrations/mlc2/redesign-bridge.js integrated-workout/progress-migration.js integrated-workout/workout-active-ux.js integrated-workout/app.js; do
               if ! curl --fail --location --silent --show-error --max-time 25 --output "$tmp/${file//\//_}" "${url}${file}"; then
                 echo "Could not fetch ${file} on attempt ${i}"
                 success=false
@@ -202,7 +235,9 @@ jobs:
               && grep -Fq 'Test saving across visits' "$tmp/integrated-workout_preview-guest-backup.js" \
               && grep -Fq 'Open selected workout' "$tmp/integrated-workout_coach-plan-preview.js" \
               && grep -Fq "typeof onChange==='function'" "$tmp/integrated-workout_coach-readiness.js" \
-              && grep -Fq 'function build(catalog,sessions,options=' "$tmp/integrated-workout_coach-program-builder.js"; then
+              && grep -Fq 'function build(catalog,sessions,options=' "$tmp/integrated-workout_coach-program-builder.js" \
+              && grep -Fq 'mlc2IntegrationScreen' "$tmp/redesign-integrated_index.html" \
+              && grep -Fq 'showMLC2Integration' "$tmp/redesign-integrated_integrations_mlc2_redesign-bridge.js"; then
               echo "Published integrated Progress V2 and exercise guide verified: ${url}integrated-workout/"
               exit 0
             fi
