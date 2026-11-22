@@ -149,6 +149,7 @@ jobs:
           test -s _site/redesign-integrated/workout-simulation.js
           test -s _site/redesign-integrated/workout-simulation.css
           grep -Fq 'SIMULATED TEST DATA' _site/redesign-integrated/app.js
+          grep -Fq 'progressData.reduce((n,x)=>n+x.sets.length,0)' _site/redesign-integrated/app.js
           grep -Fq 'simulationClear' _site/redesign-integrated/index.html
 
       - name: Upload GitHub Pages artifact
