@@ -61,7 +61,14 @@ jobs:
           grep -Fq 'name="heightFt"' replacement-candidate-src/index.html
           grep -Fq 'name="heightIn"' replacement-candidate-src/index.html
           grep -Fq 'calorie-goal-estimate.js?v=2' replacement-candidate-src/index.html
-          grep -Fq 'app.js?v=35' replacement-candidate-src/index.html
+          if ! grep -Fq 'app.js?v=35' replacement-candidate-src/index.html; then
+            echo "::error::Expected combined candidate app.js v35 (feet and inches update). Check latest integration branch checkout."
+            exit 1
+          fi
+          if grep -R -n -F 'app\\.js\\?v=34' replacement-candidate-src/tests --include='*.cjs'; then
+            echo "::error::Stale v34 assertion remains in combined candidate tests."
+            exit 1
+          fi
           (cd replacement-candidate-src && node --test tests/compact-workouts.test.cjs)
           grep -Fq 'compact-workouts.css?v=3' replacement-candidate-src/index.html
           grep -Fq 'background-color:#04252d!important' replacement-candidate-src/compact-workouts.css
