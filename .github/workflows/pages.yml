@@ -31,7 +31,7 @@ jobs:
           test -s workouts-sandbox.js
           node --check workouts-sandbox.js
           grep -q "connect-src 'none'" index.html
-          ! grep -Ei 'localStorage|sessionStorage|indexedDB|fetch\\(|XMLHttpRequest|supabase|serviceWorker|sendBeacon' workouts-sandbox.js
+          ! grep -Ei 'localStorage|sessionStorage|indexedDB|fetch[(]|XMLHttpRequest|supabase|serviceWorker|sendBeacon' workouts-sandbox.js
           ! test -e app.js
           ! test -e sync/automatic-workouts.js
           grep -q 'Workouts Sandbox' index.html
@@ -43,6 +43,8 @@ jobs:
           cp assets/approved-vertical-marble-sharp.webp _site/assets/
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
