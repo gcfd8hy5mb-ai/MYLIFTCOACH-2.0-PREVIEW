@@ -50,6 +50,8 @@ jobs:
           grep -Fq 'data-coach-apply' coach-candidate/app.js
           grep -Fq 'generatePreviewCoachHistory(plan)' coach-candidate/app.js
           grep -Fq 'SIMULATED COACH TEST DATA' coach-candidate/app.js
+          grep -Fq 'coachEvidenceLabel()' coach-candidate/app.js
+          grep -Fq 'personal history only' coach-candidate/app.js
           grep -Fq 'isCoachTestPreview()' coach-candidate/app.js
           grep -Fq 'applyCoachWeight(id)' coach-candidate/app.js
           grep -Fq "hasKnownWeight?defaults.weight:''" coach-candidate/app.js
