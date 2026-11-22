@@ -159,7 +159,7 @@ jobs:
           # must not be used as the visual foundation for this preview.
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules source-app/ _site/redesign-integrated/
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules coach-candidate/ _site/coach-live-test/
-           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules replacement-candidate-src/ _site/replacement-candidate/
+          rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules replacement-candidate-src/ _site/replacement-candidate/
 
           # The preview domain has no cloud access, so it cannot modify the
           # live app's Supabase records. Original GitHub Pages is untouched.
@@ -262,10 +262,10 @@ jobs:
           for filename in ('app.js','live-coach-workout.css'):
               asset=root/filename
               digest=sha256(asset.read_bytes()).hexdigest()[:12]
-              html=re.sub(r'(\\./'+re.escape(filename)+r')\\?v=\\d+',lambda m:m.group(1)+'?v='+digest,html)
+              html=re.sub(r'(\./'+re.escape(filename)+r')\?v=\d+',lambda m:m.group(1)+'?v='+digest,html)
           assert 'SIMULATED COACH TEST DATA' in (root/'app.js').read_text()
           assert 'generatePreviewCoachHistory' in (root/'app.js').read_text()
-          assert re.search(r'app\\.js\\?v=[a-f0-9]{12}',html)
+          assert re.search(r'app\.js\?v=[a-f0-9]{12}',html)
           page.write_text(html)
           PYCOACH
 
