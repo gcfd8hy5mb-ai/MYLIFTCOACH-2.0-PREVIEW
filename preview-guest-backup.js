@@ -5,7 +5,8 @@
 'use strict';
 if(!location.pathname.includes('/integrated-workout/'))return;
 const KEYS=['mlc2-demo-workouts-v1','mlc2-custom-plans-v1','mlc2-selected-workout-v1','mlc2-weekly-schedule-v1'];
-const STORE=window.localStorage;
+let STORE=null;
+try{STORE=window.localStorage}catch{/* Restricted browsers may block storage */}
 const parse=(s,fallback)=>{try{return JSON.parse(s)}catch{return fallback}};
 const fileStamp=()=>new Date().toISOString().slice(0,10);
 function init(){
@@ -16,6 +17,31 @@ function init(){
  note.textContent='For repeat testing, open this URL directly in Safari (not the ChatGPT in-app viewer). Demo data stays only in that browser; cloud sync is disabled.';
  note.style.cssText='font:500 12px/1.5 system-ui;color:#f5dfb5;max-width:660px;margin:auto';
  const bar=document.createElement('div');bar.style.cssText='display:flex;justify-content:center;flex-wrap:wrap;gap:7px;margin:8px 0 0';
+ const checkButton=btn('Test saving across visits');
+ const CHECK_KEY='mlc2-preview-persistence-check-v1';
+ const persistence=document.createElement('p');persistence.setAttribute('role','status');
+ persistence.style.cssText='margin:8px 0 0;font:600 12px/1.4 system-ui;color:#f4d69f';
+ function readCheck(){
+  try{
+   if(!STORE)return 'Browser storage is unavailable. Open regular Safari.';
+   const saved=JSON.parse(STORE.getItem(CHECK_KEY)||'null');
+   if(saved&&typeof saved.when==='string'){
+    return 'Saved browser test found from '+new Date(saved.when).toLocaleString()+'. This Safari storage survived a page load.';
+   }
+   return 'No previous persistence test on this browser yet.';
+  }catch{return 'Unable to read persistent browser storage. Check Safari settings.'}
+ }
+ persistence.textContent=readCheck();
+ checkButton.addEventListener('click',()=>{
+  try{
+   if(!STORE)throw Error('Browser storage is not accessible');
+   const value=JSON.stringify({when:new Date().toISOString()});
+   STORE.setItem(CHECK_KEY,value);
+   if(STORE.getItem(CHECK_KEY)!==value)throw Error('Browser failed to retain the test value');
+   persistence.textContent='Saved. Close this tab, reopen the SAME link in normal Safari, and look for the saved timestamp above.';
+   status('Browser storage accepted the test value; cross-visit persistence must be confirmed after reopening.');
+  }catch(err){persistence.textContent='Saving unavailable: '+String(err.message||err).slice(0,95)}
+ });
  const exportButton=btn('Save demo backup');
  const importButton=btn('Restore demo backup');
  const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.hidden=true;
@@ -65,9 +91,9 @@ function init(){
    location.reload();
   }catch(err){status('Backup not restored: '+String(err.message||err).slice(0,125))}
  });
- bar.append(exportButton,importButton,input);banner.append(note,bar,state);
+ bar.append(checkButton,exportButton,importButton,input);banner.append(note,persistence,bar,state);
  const count=document.createElement('div');count.style.cssText='font:500 11px system-ui;color:#f3dcaa;margin-top:6px';
- try{count.textContent='Saved guest workouts in this browser: '+getGuest().length}catch{count.textContent='Browser storage unavailable'}
+ try{count.textContent='Saved guest workouts in this browser: '+(STORE?getGuest().length:'storage unavailable')}catch{count.textContent='Browser storage unavailable'}
  banner.append(count);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
