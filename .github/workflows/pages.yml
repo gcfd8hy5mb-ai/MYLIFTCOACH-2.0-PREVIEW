@@ -46,6 +46,22 @@ jobs:
           ! test -e app.js
           ! test -e sync/automatic-workouts.js
           grep -q 'Workouts Sandbox' index.html
+      - name: Check out actual MYLIFTCOACH image development branch
+        uses: actions/checkout@v4
+        with:
+          repository: gcfd8hy5mb-ai/MYLIFTCOACH-2.0
+          ref: feature/344-approved-exercise-visuals
+          path: source-app
+          persist-credentials: false
+      - name: Validate actual app image and exercise guide integration
+        run: |
+          set -euo pipefail
+          cd source-app
+          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs
+          test -s assets/image-coming-approved.webp
+          test -s active-exercise-guide.css
+          test -s active-exercise-guide.js
+          test -s approved-visuals-manifest.js
       - name: Package preview-only website
         run: |
           set -euo pipefail
@@ -58,6 +74,25 @@ jobs:
           cp images/*.png _site/images/
           test "$(find _site/images -name '*.png' | wc -l)" -eq 14
           cp assets/approved-vertical-marble-sharp.webp _site/assets/
+          # Copy the actual source branch into a separate, non-live preview path.
+          # Exclude repository metadata and automation files.
+          mkdir -p _site/integrated-workout
+          rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=preview --exclude=standalone-preview-template --exclude=node_modules source-app/ _site/integrated-workout/
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/integrated-workout/index.html')
+          s=p.read_text()
+          assert '<head>' in s and '</body>' in s
+          csp = """<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'none'; frame-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'">"""
+          s=s.replace('<head>','<head>\n'+csp,1)
+          banner = """<aside style="position:relative;z-index:99999;background:#092d30;color:#f9d9a0;border-bottom:1px solid #c3a76f;padding:8px 13px;text-align:center;font:600 12px system-ui">TEST BUILD · No cloud connections. Use demo workouts only. Changes here do not affect your live app.</aside>"""
+          s=s.replace('<body>','<body>\n'+banner,1)
+          p.write_text(s)
+          PY
+          grep -q "connect-src 'none'" _site/integrated-workout/index.html
+          test -s _site/integrated-workout/assets/image-coming-approved.webp
+          test -s _site/integrated-workout/active-exercise-guide.js
+          test -s _site/integrated-workout/approved-visuals-manifest.js
           touch _site/.nojekyll
       - name: Upload exact Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -86,7 +121,9 @@ jobs:
           for i in 1 2 3 4 5; do
             if curl --fail --silent --show-error --max-time 10 "$url" | grep -q 'Workouts Sandbox' \
               && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.html" | grep -q 'Quick Exercise Guide' \
-              && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.js" | grep -q 'MLC2_EXERCISE_CATALOG'; then
+              && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.js" | grep -q 'MLC2_EXERCISE_CATALOG' \
+              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/index.html" | grep -q 'TEST BUILD' \
+              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/active-exercise-guide.js" | grep -q 'View Full Guide'; then
               echo "Independent preview and interactive guide verified: $url"
               exit 0
             fi
