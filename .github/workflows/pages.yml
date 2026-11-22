@@ -144,20 +144,35 @@ jobs:
         run: |
           set -euo pipefail
           url="${PAGES_URL%/}/"
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          # Download to disk before inspecting. Piping curl into grep -q
+          # closes stdout early and triggers curl 23 under pipefail.
           for i in 1 2 3 4 5; do
-            if curl --fail --silent --show-error --max-time 10 "$url" | grep -q 'Workouts Sandbox' \
-              && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.html" | grep -q 'Quick Exercise Guide' \
-              && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.js" | grep -q 'MLC2_EXERCISE_CATALOG' \
-              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/index.html" | grep -q 'PROGRESS TABS V2' \
-              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/active-exercise-guide.js" | grep -q 'View Full Guide' \
-              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/workouts-tabs-n.css" | grep -q 'background:#04252d!important' \
-              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/exercise-instruction-coverage.js" | grep -q 'const groups=new Map()' \
-              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/exercise-instruction-depth.js" | grep -q 'revisions.length!==92' \
-              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/progress-compact.js" | grep -q 'progress-compact-tabs'; then
-              echo "Independent preview and interactive guide verified: $url"
+            success=true
+            for file in index.html exercise-guide-demo.html exercise-guide-demo.js integrated-workout/index.html integrated-workout/active-exercise-guide.js integrated-workout/workouts-tabs-n.css integrated-workout/exercise-instruction-coverage.js integrated-workout/exercise-instruction-depth.js integrated-workout/progress-compact.js integrated-workout/progress-compact.css; do
+              if ! curl --fail --location --silent --show-error --max-time 25 --output "$tmp/${file//\//_}" "${url}${file}"; then
+                echo "Could not fetch ${file} on attempt ${i}"
+                success=false
+                break
+              fi
+            done
+            if [ "$success" = true ] \
+              && grep -Fq 'Workouts Sandbox' "$tmp/index.html" \
+              && grep -Fq 'Quick Exercise Guide' "$tmp/exercise-guide-demo.html" \
+              && grep -Fq 'MLC2_EXERCISE_CATALOG' "$tmp/exercise-guide-demo.js" \
+              && grep -Fq 'PROGRESS TABS V2' "$tmp/integrated-workout_index.html" \
+              && grep -Fq 'View Full Guide' "$tmp/integrated-workout_active-exercise-guide.js" \
+              && grep -Fq 'background:#04252d!important' "$tmp/integrated-workout_workouts-tabs-n.css" \
+              && grep -Fq 'const groups=new Map()' "$tmp/integrated-workout_exercise-instruction-coverage.js" \
+              && grep -Fq 'revisions.length!==92' "$tmp/integrated-workout_exercise-instruction-depth.js" \
+              && grep -Fq 'progress-compact-tabs' "$tmp/integrated-workout_progress-compact.js" \
+              && grep -Fq 'progress-compact-panel' "$tmp/integrated-workout_progress-compact.css"; then
+              echo "Published integrated Progress V2 and exercise guide verified: ${url}integrated-workout/"
               exit 0
             fi
+            echo "Published files still refreshing or not yet valid (attempt ${i}/5)"
             sleep 10
           done
-          echo 'Expected interactive exercise guide not available in published Pages output.'
+          echo 'Post-deployment verification failed. Published website may exist; inspect individual downloads above.'
           exit 1
