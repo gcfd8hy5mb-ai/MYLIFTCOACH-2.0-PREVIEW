@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#063a3d">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://raw.githubusercontent.com data:; connect-src 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'">
+<title>MYLIFTCOACH 2.0 | Interactive Exercise Guide</title>
+<link rel="stylesheet" href="./exercise-guide-demo.css?v=1">
+<script defer src="./exercise-visuals-344-catalog.js?v=1"></script>
+<script defer src="./exercise-visuals-344-manifest.js?v=1"></script>
+<script defer src="./exercise-guide-demo.js?v=1"></script>
+</head><body>
+<main class="shell">
+<header><div class="brand"><span class="gold">▥</span> MYLIFTCOACH <em>2.0</em></div><span class="beta">INTERACTIVE PREVIEW</span></header>
+<div class="safe">Demonstration only · No login, saved workouts, or cloud changes. Test interactions reset when you reload.</div>
+<section class="heading"><span class="eyebrow">TODAY'S WORKOUT</span><h1>Chest (Day 1)</h1><p>Try the quick guide while logging a practice set, then open the full exercise guide.</p></section>
+<div class="pick"><label for="exercise">Exercise</label><select id="exercise"><option value="machine-chest-press">Machine Chest Press</option></select><span id="position"></span></div>
+<article class="workout">
+<div class="intro"><div class="cover"><img id="thumb" alt="Exercise illustration"></div><div class="details"><h2 id="name">Machine Chest Press</h2><p id="group"></p><div class="targets"><span>Sets <b id="sets">3</b></span><span>Reps <b id="reps">8–12</b></span></div></div></div>
+<div class="tracker"><label for="weight">Weight (lb)<input id="weight" type="number" min="0" step="2.5" value="40"></label><label for="repsInput">Repetitions<input id="repsInput" type="number" min="1" max="100" value="10"></label><button id="log" type="button">Log practice set</button></div>
+<p id="progress" role="status">0 practice sets logged</p>
+<button class="expand" id="expand" type="button" aria-expanded="false" aria-controls="quick"><span>◫ &nbsp; Quick Exercise Guide</span><span id="arrow">⌄</span></button>
+<div id="quick" hidden>
+<div class="quick-media"><img id="quickImage" alt="Exercise starting position"><span>STARTING POSITION</span></div>
+<h3>How to Perform</h3><p id="quickHow"></p>
+<div class="quick-stats"><div><strong>Muscles worked</strong><p id="quickMuscles"></p></div><div><strong>Form tip</strong><p id="quickTip"></p></div></div>
+<button class="full-button" id="full" type="button">View Full Exercise Guide →</button>
+</div>
+</article>
+<footer><a href="./exercise-visuals-344-preview.html?v=4">← All 344 exercise images</a><span>PREVIEW ONLY</span></footer>
+</main>
+<div class="overlay" id="overlay" hidden><section class="guide" role="dialog" aria-modal="true" aria-labelledby="guideTitle"><div class="guide-top"><button id="back" type="button">← Back to workout</button><span>EXERCISE GUIDE</span></div><h2 id="guideTitle"></h2><p class="meta" id="guideMeta"></p><figure class="demo"><img id="fullImage" alt="Full two-position exercise demonstration"><figcaption id="demoCaption"></figcaption></figure><div class="info"><h3>How to Perform</h3><p id="how"></p></div><div class="info"><h3>Muscles Worked</h3><p id="muscles"></p><p class="muted" id="equipment"></p></div><div class="info"><h3>Technique Tips</h3><ul id="tips"></ul></div><div class="info"><h3>Common Mistakes</h3><ul id="mistakes"></ul></div><button class="full-button" id="return" type="button">Return to workout</button></section></div>
+</body></html>
