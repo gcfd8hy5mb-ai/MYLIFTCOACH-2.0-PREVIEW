@@ -29,6 +29,26 @@ jobs:
           # Source and preview are public repositories; checkout needs no extra secret.
           persist-credentials: false
 
+      - name: Check out isolated Coach candidate
+        uses: actions/checkout@v4
+        with:
+          repository: gcfd8hy5mb-ai/MYLIFTCOACH-2.0
+          ref: feature/coach-live-workout-integration-20261122
+          path: coach-candidate
+          persist-credentials: false
+
+      - name: Validate Coach candidate before packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s coach-candidate/index.html
+          test -s coach-candidate/coach-migration.js
+          test -s coach-candidate/live-coach-workout.css
+          grep -Fq 'liveCoachPreview(plan)' coach-candidate/app.js
+          grep -Fq 'liveCoachFeedback(id)' coach-candidate/app.js
+          node --check coach-candidate/app.js
+          node --test coach-candidate/tests/coach-live-workout.test.cjs
+
       - name: Source checkout diagnostics
         if: failure()
         shell: bash
@@ -79,14 +99,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p _site/integrated-workout _site/redesign-integrated
+          mkdir -p _site/integrated-workout _site/redesign-integrated _site/coach-live-test
           # Keep all pre-existing independent preview pages working.
-          rsync -a --exclude=.git --exclude=.github --exclude=_site --exclude=source-app --exclude=redesign-app --exclude=node_modules ./ _site/
+          rsync -a --exclude=.git --exclude=.github --exclude=_site --exclude=source-app --exclude=redesign-app --exclude=coach-candidate --exclude=node_modules ./ _site/
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules source-app/ _site/integrated-workout/
           # The approved dark-teal marble redesign is the MYLIFTCOACH-2.0
           # source app. The workout-tracker branch is the old purple UI and
           # must not be used as the visual foundation for this preview.
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules source-app/ _site/redesign-integrated/
+          rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules coach-candidate/ _site/coach-live-test/
 
           # The preview domain has no cloud access, so it cannot modify the
           # live app's Supabase records. Original GitHub Pages is untouched.
@@ -169,6 +190,21 @@ jobs:
           grep -Fq 'simulationAudit' _site/redesign-integrated/index.html
           grep -Fq 'history2SimulationNotice' _site/redesign-integrated/index.html
           grep -Fq 'const demo=viewedHistory()' _site/redesign-integrated/app.js
+
+          # Make Coach test page explicitly identifiable and block its production backend.
+          python3 - <<'PYCOACH'
+          from pathlib import Path
+          root=Path('_site/coach-live-test')
+          page=root/'index.html'
+          html=page.read_text()
+          assert 'live-coach-workout.css' in html and 'coach-migration.js' in html
+          policy='<meta http-equiv="Content-Security-Policy" content="connect-src \'none\'; form-action \'none\'; frame-src \'none\'; object-src \'none\'">'
+          html=html.replace('<head>','<head>\n'+policy,1)
+          html=html.replace('<body>','<body>\n<div role="status" style="position:relative;z-index:99999;background:#082b31;color:#f4d69f;border-bottom:1px solid #c9a96b;padding:9px 12px;text-align:center;font:600 12px system-ui">COACH TEST · CLOUD BLOCKED · INDEPENDENT PREVIEW</div>',1)
+          page.write_text(html)
+          assert (root/'app.js').is_file()
+          assert (root/'live-coach-workout.css').is_file()
+          PYCOACH
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
