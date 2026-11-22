@@ -48,6 +48,9 @@ jobs:
           grep -Fq 'liveCoachFeedback(id)' coach-candidate/app.js
           grep -Fq 'live-coach-dropdown' coach-candidate/app.js
           grep -Fq 'data-coach-apply' coach-candidate/app.js
+          grep -Fq 'generatePreviewCoachHistory(plan)' coach-candidate/app.js
+          grep -Fq 'SIMULATED COACH TEST DATA' coach-candidate/app.js
+          grep -Fq 'isCoachTestPreview()' coach-candidate/app.js
           grep -Fq 'applyCoachWeight(id)' coach-candidate/app.js
           grep -Fq "hasKnownWeight?defaults.weight:''" coach-candidate/app.js
           node --check coach-candidate/app.js
