@@ -156,7 +156,7 @@ jobs:
           # closes stdout early and triggers curl 23 under pipefail.
           for i in 1 2 3 4 5; do
             success=true
-            for file in index.html exercise-guide-demo.html exercise-guide-demo.js integrated-workout/index.html integrated-workout/active-exercise-guide.js integrated-workout/workouts-tabs-n.css integrated-workout/exercise-instruction-coverage.js integrated-workout/exercise-instruction-depth.js integrated-workout/progress-compact.js integrated-workout/progress-compact.css; do
+            for file in index.html exercise-guide-demo.html exercise-guide-demo.js integrated-workout/index.html integrated-workout/active-exercise-guide.js integrated-workout/workouts-tabs-n.css integrated-workout/exercise-instruction-coverage.js integrated-workout/exercise-instruction-depth.js integrated-workout/progress-compact.js integrated-workout/progress-compact.css integrated-workout/progress-migration.js integrated-workout/workout-active-ux.js integrated-workout/app.js; do
               if ! curl --fail --location --silent --show-error --max-time 25 --output "$tmp/${file//\//_}" "${url}${file}"; then
                 echo "Could not fetch ${file} on attempt ${i}"
                 success=false
@@ -173,7 +173,10 @@ jobs:
               && grep -Fq 'const groups=new Map()' "$tmp/integrated-workout_exercise-instruction-coverage.js" \
               && grep -Fq 'revisions.length!==92' "$tmp/integrated-workout_exercise-instruction-depth.js" \
               && grep -Fq 'progress-compact-tabs' "$tmp/integrated-workout_progress-compact.js" \
-              && grep -Fq 'progress-compact-panel' "$tmp/integrated-workout_progress-compact.css"; then
+              && grep -Fq 'progress-compact-panel' "$tmp/integrated-workout_progress-compact.css" \
+              && grep -Fq 'sum of weight × reps from your completed sets' "$tmp/integrated-workout_progress-migration.js" \
+              && grep -Fq "source:'empty'" "$tmp/integrated-workout_workout-active-ux.js" \
+              && grep -Fq 'volumeTotal(x.sets)' "$tmp/integrated-workout_app.js"; then
               echo "Published integrated Progress V2 and exercise guide verified: ${url}integrated-workout/"
               exit 0
             fi
