@@ -29,6 +29,10 @@ jobs:
           test -s workouts-visual-preview.css
           test -s workouts-sandbox.css
           test -s workouts-sandbox.js
+          test -s exercise-images.html
+          test -s exercise-images.js
+          test -s exercise-images.css
+          node --check exercise-images.js
           node --check workouts-sandbox.js
           grep -q "connect-src 'none'" index.html
           ! grep -Ei 'localStorage|sessionStorage|indexedDB|fetch[(]|XMLHttpRequest|supabase|serviceWorker|sendBeacon' workouts-sandbox.js
@@ -40,6 +44,10 @@ jobs:
           set -euo pipefail
           mkdir -p _site/assets
           cp index.html workouts-visual-preview.css workouts-sandbox.css workouts-sandbox.js _site/
+          cp exercise-images.html exercise-images.js exercise-images.css _site/
+          mkdir -p _site/images
+          cp images/*.png _site/images/
+          test "$(find _site/images -name '*.png' | wc -l)" -eq 14
           cp assets/approved-vertical-marble-sharp.webp _site/assets/
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
