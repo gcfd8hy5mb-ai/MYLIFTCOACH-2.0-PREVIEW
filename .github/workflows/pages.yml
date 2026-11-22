@@ -45,6 +45,8 @@ jobs:
           node --test tests/exercise-visuals-344.test.cjs
           node --test tests/active-exercise-guide.test.cjs
           node --test tests/workout-card-images.test.cjs
+          node --test tests/coach-weekly-schedule.test.cjs
+          node --check workouts-tabs-n.js
           node --check active-exercise-guide.js
           grep -Fq 'saveCoachDay' custom-workouts.js
           grep -Fq 'custom.find(p=>!p.coachSaved)' weekly-workout-schedule.js
@@ -100,7 +102,7 @@ jobs:
                   asset=root/path
                   if not asset.is_file(): raise RuntimeError('Missing deployed asset '+str(asset))
                   return path+'?v='+sha256(asset.read_bytes()).hexdigest()[:12]
-              html=re.sub(r'(?<![A-Za-z0-9_-])(?:\\./)?(coach-program-builder\\.js|custom-workouts\\.js|app\\.js|coach-migration\\.css|exercise-placeholders\\.css|active-exercise-guide\\.css|active-exercise-guide\\.js|home-rebuild\\.css|workouts-tabs-n\\.css)\\?v=\\d+',bust,html)
+              html=re.sub(r'(?<![A-Za-z0-9_-])(?:\\./)?(coach-program-builder\\.js|custom-workouts\\.js|app\\.js|coach-migration\\.css|exercise-placeholders\\.css|active-exercise-guide\\.css|active-exercise-guide\\.js|home-rebuild\\.css|workouts-tabs-n\\.css|workouts-tabs-n\\.js|custom-workouts\\.js)\\?v=\\d+',bust,html)
               page.write_text(html)
           PYCACHE
           grep -Fq 'saveCoachDay' _site/redesign-integrated/custom-workouts.js
@@ -129,6 +131,9 @@ jobs:
           grep -Fq 'workout-card-illustration' _site/redesign-integrated/app.js
           grep -Fq '#home .preview-exercise-picture' _site/redesign-integrated/home-rebuild.css
           grep -Fq '#workouts .workout-card-illustration' _site/redesign-integrated/workouts-tabs-n.css
+          grep -Fq 'coachSchedulePanel' _site/redesign-integrated/index.html
+          grep -Fq 'window.MLC2WorkoutsSelectTab' _site/redesign-integrated/workouts-tabs-n.js
+          grep -Fq 'pendingCoachScheduleOwner!==verifiedOwnerId' _site/redesign-integrated/app.js
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -161,7 +166,8 @@ jobs:
                grep -Eq 'coach-program-builder.js\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
                grep -Eq 'active-exercise-guide.js\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
                grep -Eq 'home-rebuild.css\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
-               grep -Eq 'workouts-tabs-n.css\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html; then
+               grep -Eq 'workouts-tabs-n.css\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
+               grep -Eq 'workouts-tabs-n.js\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html; then
               echo "Verified integrated redesign: ${url}"
               exit 0
             fi
