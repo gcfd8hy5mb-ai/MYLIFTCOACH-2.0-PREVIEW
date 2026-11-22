@@ -211,6 +211,17 @@ jobs:
           page.write_text(html)
           assert (root/'app.js').is_file()
           assert (root/'live-coach-workout.css').is_file()
+          # Version the actual test assets by their deployed content, not a manual v= counter.
+          from hashlib import sha256
+          import re
+          for filename in ('app.js','live-coach-workout.css'):
+              asset=root/filename
+              digest=sha256(asset.read_bytes()).hexdigest()[:12]
+              html=re.sub(r'(\\./'+re.escape(filename)+r')\\?v=\\d+',lambda m:m.group(1)+'?v='+digest,html)
+          assert 'SIMULATED COACH TEST DATA' in (root/'app.js').read_text()
+          assert 'generatePreviewCoachHistory' in (root/'app.js').read_text()
+          assert re.search(r'app\\.js\\?v=[a-f0-9]{12}',html)
+          page.write_text(html)
           PYCOACH
 
       - name: Upload GitHub Pages artifact
@@ -271,7 +282,11 @@ jobs:
           for attempt in 1 2 3 4 5; do
             if curl --fail --location --silent --show-error --max-time 20 --output /tmp/coach-live-test.html "${url}index.html" &&
                grep -Fq 'live-coach-workout.css' /tmp/coach-live-test.html &&
-               grep -Fq 'COACH TEST' /tmp/coach-live-test.html; then
+               grep -Fq 'COACH TEST' /tmp/coach-live-test.html &&
+               grep -Eq 'app.js\\?v=[a-f0-9]{12}' /tmp/coach-live-test.html &&
+               curl --fail --location --silent --show-error --max-time 20 --output /tmp/coach-live-app.js "${url}app.js" &&
+               grep -Fq 'SIMULATED COACH TEST DATA' /tmp/coach-live-app.js &&
+               grep -Fq 'generatePreviewCoachHistory(plan)' /tmp/coach-live-app.js; then
               echo "Verified isolated Coach test: ${url}"
               exit 0
             fi
