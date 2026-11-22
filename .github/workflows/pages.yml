@@ -55,7 +55,7 @@ jobs:
           test -s replacement-candidate-src/coach-periodization.js
           test -s replacement-candidate-src/goal-program-adherence.js
           test -s replacement-candidate-src/sync/aux-data.js
-          (cd replacement-candidate-src && node tests/replacement-media-merge.test.cjs && node tests/coach-program-cloud-backup.test.cjs && node tests/home-program-priority.test.cjs && node tests/combined-coach-panels.test.cjs && node tests/coach-consistent-history.test.cjs && node tests/today-program-labels.test.cjs && node tests/goal-program-adherence.test.cjs && node tests/program-rotation-scope.test.cjs && node tests/calorie-goal-estimate.test.cjs && node tests/concurrent-workout-sync.test.cjs && node tests/resume-workout-cta.test.cjs && node --check app.js)
+          (cd replacement-candidate-src && node tests/replacement-media-merge.test.cjs && node tests/coach-program-cloud-backup.test.cjs && node tests/home-program-priority.test.cjs && node tests/combined-coach-panels.test.cjs && node tests/coach-consistent-history.test.cjs && node tests/today-program-labels.test.cjs && node tests/goal-program-adherence.test.cjs && node tests/program-rotation-scope.test.cjs && node tests/calorie-goal-estimate.test.cjs && node tests/concurrent-workout-sync.test.cjs && node tests/resume-workout-cta.test.cjs && node tests/beta-live-refresh.test.cjs && node --check app.js)
           grep -Fq 'coachProgramBuilder' replacement-candidate-src/index.html
           grep -Fq 'coachPlanPreview' replacement-candidate-src/index.html
           grep -Fq 'live-coach-workout.css?v=12' replacement-candidate-src/index.html
@@ -63,8 +63,8 @@ jobs:
           grep -Fq 'name="heightFt"' replacement-candidate-src/index.html
           grep -Fq 'name="heightIn"' replacement-candidate-src/index.html
           grep -Fq 'calorie-goal-estimate.js?v=2' replacement-candidate-src/index.html
-          if ! grep -Fq 'app.js?v=37' replacement-candidate-src/index.html; then
-            echo "::error::Expected combined candidate app.js v37 (feet and inches update). Check latest integration branch checkout."
+          if ! grep -Fq 'app.js?v=38' replacement-candidate-src/index.html; then
+            echo "::error::Expected combined candidate app.js v38 (feet and inches update). Check latest integration branch checkout."
             exit 1
           fi
           if grep -R -n -F 'app\\.js\\?v=34' replacement-candidate-src/tests --include='*.cjs'; then
