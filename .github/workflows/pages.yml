@@ -63,6 +63,9 @@ jobs:
       - name: Validate redesign integration shell
         run: |
           set -euo pipefail
+          cd redesign-app
+          node --test tests/mlc2-redesign-integration.test.cjs
+          cd ..
           node --check redesign-app/integrations/mlc2/redesign-bridge.js
           node --check redesign-app/integrations/mlc2/coach-program-builder.js
           grep -Fq 'id="mlc2IntegrationScreen"' redesign-app/index.html
@@ -105,6 +108,8 @@ jobs:
           test -s _site/redesign-integrated/index.html
           test -s _site/redesign-integrated/integrations/mlc2/redesign-bridge.js
           test -s _site/redesign-integrated/integrations/mlc2/coach-program-builder.js
+          grep -Fq 'mlc2ExerciseSearch' _site/redesign-integrated/index.html
+          grep -Fq 'renderExerciseLibrary' _site/redesign-integrated/integrations/mlc2/redesign-bridge.js
           cp preview-guest-backup.js _site/integrated-workout/
           node --check preview-guest-backup.js
           grep -Fq 'Test saving across visits' preview-guest-backup.js
@@ -237,7 +242,7 @@ jobs:
               && grep -Fq "typeof onChange==='function'" "$tmp/integrated-workout_coach-readiness.js" \
               && grep -Fq 'function build(catalog,sessions,options=' "$tmp/integrated-workout_coach-program-builder.js" \
               && grep -Fq 'mlc2IntegrationScreen' "$tmp/redesign-integrated_index.html" \
-              && grep -Fq 'showMLC2Integration' "$tmp/redesign-integrated_integrations_mlc2_redesign-bridge.js"; then
+              && grep -Fq 'renderExerciseLibrary' "$tmp/redesign-integrated_integrations_mlc2_redesign-bridge.js"; then
               echo "Published integrated Progress V2 and exercise guide verified: ${url}integrated-workout/"
               exit 0
             fi
