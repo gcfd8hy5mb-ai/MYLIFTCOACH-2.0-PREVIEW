@@ -43,6 +43,7 @@ jobs:
           node --check custom-workouts.js
           node --test tests/coach-program-builder.test.cjs tests/coach-plan-preview.test.cjs tests/coach-save-custom.test.cjs
           grep -Fq 'saveCoachDay' custom-workouts.js
+          grep -Fq 'custom.find(p=>!p.coachSaved)' weekly-workout-schedule.js
           grep -Fq 'onSaveDay:day=>' app.js
           grep -Fq 'theme-option-one.css' index.html
           grep -Fq 'coach-program-builder.js' index.html
@@ -97,6 +98,7 @@ jobs:
           PYCACHE
           grep -Fq 'saveCoachDay' _site/redesign-integrated/custom-workouts.js
           grep -Fq 'onSaveDay:day=>' _site/redesign-integrated/app.js
+          grep -Fq 'custom.find(p=>!p.coachSaved)' _site/redesign-integrated/weekly-workout-schedule.js
           touch _site/.nojekyll
           test -s _site/redesign-integrated/index.html
           test -s _site/redesign-integrated/exercise-catalog-344.js
