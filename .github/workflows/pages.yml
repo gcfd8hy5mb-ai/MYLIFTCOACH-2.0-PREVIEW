@@ -84,10 +84,13 @@ jobs:
           set -euo pipefail
           url="${PAGES_URL%/}/"
           for i in 1 2 3 4 5; do
-            if curl --fail --silent --show-error --max-time 10 "$url" | grep -q 'Workouts Sandbox'; then
-              echo "Standalone preview verified: $url"
+            if curl --fail --silent --show-error --max-time 10 "$url" | grep -q 'Workouts Sandbox' \
+              && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.html" | grep -q 'Quick Exercise Guide' \
+              && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.js" | grep -q 'MLC2_EXERCISE_CATALOG'; then
+              echo "Independent preview and interactive guide verified: $url"
               exit 0
             fi
             sleep 10
           done
+          echo 'Expected interactive exercise guide not available in published Pages output.'
           exit 1
