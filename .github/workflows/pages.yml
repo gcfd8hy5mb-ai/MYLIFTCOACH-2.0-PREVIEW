@@ -110,8 +110,8 @@ jobs:
           test -s _site/integrated-workout/progress-compact.css
           grep -q 'recent-item:nth-child(n+6)' _site/integrated-workout/progress-compact.css
           grep -q "progress-compact.js" _site/integrated-workout/index.html
-          grep -Eq 'progress-compact.js\\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
-          grep -Eq 'progress-compact.css\\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
+          grep -Eq 'progress-compact.js\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
+          grep -Eq 'progress-compact.css\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
           grep -q 'background:#04252d!important' _site/integrated-workout/workouts-tabs-n.css
           grep -q 'const groups=new Map()' _site/integrated-workout/exercise-instruction-coverage.js
           grep -q 'exercise-instruction-coverage.js?v=' _site/integrated-workout/index.html
