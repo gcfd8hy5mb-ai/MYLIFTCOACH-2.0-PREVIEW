@@ -42,8 +42,10 @@ jobs:
           node --check app.js
           node --check custom-workouts.js
           node --test tests/coach-program-builder.test.cjs tests/coach-plan-preview.test.cjs tests/coach-save-custom.test.cjs
+          node --test tests/exercise-visuals-344.test.cjs
           grep -Fq 'saveCoachDay' custom-workouts.js
           grep -Fq 'custom.find(p=>!p.coachSaved)' weekly-workout-schedule.js
+          grep -Fq 'coachSaved:existing?.coachSaved===true' custom-workouts.js
           grep -Fq 'onSaveDay:day=>' app.js
           grep -Fq 'theme-option-one.css' index.html
           grep -Fq 'coach-program-builder.js' index.html
@@ -109,6 +111,10 @@ jobs:
           grep -Fq 'theme-option-one.css' _site/redesign-integrated/index.html
           grep -Fq 'coach-program-builder.js' _site/redesign-integrated/index.html
           test -s _site/redesign-integrated/assets/myliftcoach-mark.svg
+          test -s _site/redesign-integrated/approved-visuals-manifest.js
+          test -s _site/redesign-integrated/exercise-visuals-344.js
+          test -s _site/redesign-integrated/assets/exercise-demonstrations/machine-chest-press-r2.webp
+          grep -Fq 'coachSaved:existing?.coachSaved===true' _site/redesign-integrated/custom-workouts.js
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
