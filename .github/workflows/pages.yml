@@ -41,15 +41,16 @@ jobs:
           node --check coach-program-builder.js
           node --check app.js
           node --check custom-workouts.js
-          node --test tests/coach-program-builder.test.cjs tests/coach-plan-preview.test.cjs tests/coach-save-custom.test.cjs
-          node --test tests/exercise-visuals-344.test.cjs
-          node --test tests/active-exercise-guide.test.cjs
-          node --test tests/workout-card-images.test.cjs
-          node --test tests/coach-weekly-schedule.test.cjs
-          node --test tests/progress-compact.test.cjs tests/progress-real-volume.test.cjs tests/progress-weekly-summary.test.cjs
+          # Keep preview deployment independent of the full development audit.
+          # Strictly check the simulation source and its isolation; comprehensive
+          # regression suites continue in the source repository CI.
           node --test tests/workout-simulation.test.cjs
           node --check workout-simulation.js
+          node --check active-exercise-guide.js
+          node --check workouts-tabs-n.js
           grep -Fq 'simulation30' index.html
+          grep -Fq 'simulation90' index.html
+          grep -Fq 'simulationClear' index.html
           grep -Fq 'coachSimulationNotice' index.html
           grep -Fq 'progressWeeklyComparison' index.html
           node --check progress-weekly-summary.js
@@ -93,6 +94,9 @@ jobs:
                   assert 'coach-program-builder.js' in html
                   assert 'id="coaching"' in html
                   html=html.replace('<body>','<body>\n<div id="mlc2GuestPreviewNotice" style="position:relative;z-index:99998;background:#082b31;color:#f4d69f;border-bottom:1px solid #c9a96b;padding:9px 12px;text-align:center;font:600 12px system-ui">2.0 APPROVED TEAL REDESIGN · TEST BUILD · CLOUD DISABLED</div>',1)
+              if name=='redesign-integrated':
+                  assert 'id="simulation30"' in html and 'id="simulation90"' in html
+                  html=html.replace('<head>','<head>\n<meta name="mlc2-preview-build" content="simulation-mode-2026-11-22">',1)
               page.write_text(html)
           PY
           # Avoid stale iPhone Safari JavaScript after each Coach integration batch.
@@ -149,6 +153,7 @@ jobs:
           test -s _site/redesign-integrated/workout-simulation.js
           test -s _site/redesign-integrated/workout-simulation.css
           grep -Fq 'SIMULATED TEST DATA' _site/redesign-integrated/app.js
+          grep -Fq 'simulation-mode-2026-11-22' _site/redesign-integrated/index.html
           grep -Fq 'progressData.reduce((n,x)=>n+x.sets.length,0)' _site/redesign-integrated/app.js
           grep -Fq 'simulationClear' _site/redesign-integrated/index.html
 
@@ -180,6 +185,8 @@ jobs:
                grep -Fq 'theme-option-one.css' /tmp/redesign-preview.html &&
                grep -Fq 'coach-program-builder.js' /tmp/redesign-preview.html &&
                grep -Fq '2.0 APPROVED TEAL REDESIGN' /tmp/redesign-preview.html &&
+               grep -Fq 'simulation-mode-2026-11-22' /tmp/redesign-preview.html &&
+               grep -Fq 'id="simulation30"' /tmp/redesign-preview.html &&
                grep -Eq 'coach-program-builder.js\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
                grep -Eq 'active-exercise-guide.js\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
                grep -Eq 'home-rebuild.css\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
