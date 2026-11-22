@@ -94,7 +94,7 @@ jobs:
               if not file.exists(): return m.group(0)
               stamp=sha256(file.read_bytes()).hexdigest()[:12]
               return f'{asset}?v={stamp}'
-          s=re.sub(r'(workouts-tabs-n\\.css|exercise-instruction-coverage\\.js)\\?v=\\d+',bust,s)
+          s=re.sub(r'(workouts-tabs-n\.css|exercise-instruction-coverage\.js)\?v=\d+',bust,s)
 
           banner = """<aside style="position:relative;z-index:99999;background:#092d30;color:#f9d9a0;border-bottom:1px solid #c3a76f;padding:8px 13px;text-align:center;font:600 12px system-ui">TEST BUILD · No cloud connections. Use demo workouts only. Changes here do not affect your live app.</aside>"""
           s=s.replace('<body>','<body>\n'+banner,1)
