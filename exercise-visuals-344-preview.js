@@ -28,7 +28,7 @@ const display=(e)=>e.visual?root+e.visual.thumbnail:placeholder;
 function render(){
  const matches=exercises.filter(e=>(current==='all'||(current==='approved'&&e.visual)||(current==='coming'&&!e.visual))&& (e.name+' '+e.group).toLowerCase().includes(search));
  $('count').textContent=matches.length+' exercises shown';
- $('grid').innerHTML=matches.map(e=>'<button type="button" class="exercise" data-id="'+esc(e.id)+'"><span class="photo"><img loading="lazy" alt="'+esc(e.visual?'Approved '+e.name+' demonstration':e.name+' image coming')+'" src="'+esc(display(e))+'"><span class="chip">'+(e.visual?'APPROVED':'IMAGE COMING')+'</span></span><span class="exercise-info"><strong>'+esc(e.name)+'</strong><small>'+esc(e.group)+'</small></span></button>').join('')||'<p>No exercises match your search.</p>';
+ $('grid').innerHTML=matches.map(e=>'<button type="button" class="exercise" data-id="'+esc(e.id)+'"><span class="photo'+(e.visual?' photo--first-frame':'')+'"><img loading="lazy" alt="'+esc(e.visual?'Approved '+e.name+' demonstration':e.name+' image coming')+'" src="'+esc(display(e))+'"><span class="chip">'+(e.visual?'APPROVED':'IMAGE COMING')+'</span></span><span class="exercise-info"><strong>'+esc(e.name)+'</strong><small>'+esc(e.group)+'</small></span></button>').join('')||'<p>No exercises match your search.</p>';
  $('grid').querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{
    img.replaceWith(Object.assign(document.createElement('span'),{className:'missing',textContent:'Image could not be loaded'}));
  },{once:true}));
