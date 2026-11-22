@@ -65,6 +65,10 @@ jobs:
           grep -Fq 'name="programWeeks"' coach-candidate/index.html
           grep -Fq 'goalProgramProgress' coach-candidate/index.html
           node --test coach-candidate/tests/goal-program-calendar.test.cjs
+          test -s coach-candidate/goal-program-source.js
+          grep -Fq 'name="programSource"' coach-candidate/index.html
+          grep -Fq 'name="programCustom"' coach-candidate/index.html
+          node --test coach-candidate/tests/goal-program-source.test.cjs
           grep -Fq 'personal history only' coach-candidate/app.js
           grep -Fq 'isCoachTestPreview()' coach-candidate/app.js
           grep -Fq 'applyCoachWeight(id)' coach-candidate/app.js
