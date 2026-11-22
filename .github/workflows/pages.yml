@@ -37,6 +37,27 @@ jobs:
           path: coach-candidate
           persist-credentials: false
 
+      - name: Check out merged replacement candidate (no production publication)
+        uses: actions/checkout@v4
+        with:
+          repository: gcfd8hy5mb-ai/MYLIFTCOACH-2.0
+          ref: integration/replacement-visual-coach-20261122
+          path: replacement-candidate-src
+          persist-credentials: false
+
+      - name: Verify combined Coach and approved artwork before packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s replacement-candidate-src/index.html
+          test -s replacement-candidate-src/approved-visuals-manifest.js
+          test -s replacement-candidate-src/active-exercise-guide.js
+          test -s replacement-candidate-src/coach-periodization.js
+          test -s replacement-candidate-src/sync/aux-data.js
+          node replacement-candidate-src/tests/replacement-media-merge.test.cjs
+          node replacement-candidate-src/tests/coach-program-cloud-backup.test.cjs
+          node --check replacement-candidate-src/app.js
+
       - name: Validate Coach candidate before packaging
         shell: bash
         run: |
@@ -129,15 +150,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p _site/integrated-workout _site/redesign-integrated _site/coach-live-test
+          mkdir -p _site/integrated-workout _site/redesign-integrated _site/coach-live-test _site/replacement-candidate
           # Keep all pre-existing independent preview pages working.
-          rsync -a --exclude=.git --exclude=.github --exclude=_site --exclude=source-app --exclude=redesign-app --exclude=coach-candidate --exclude=node_modules ./ _site/
+          rsync -a --exclude=.git --exclude=.github --exclude=_site --exclude=source-app --exclude=redesign-app --exclude=coach-candidate --exclude=replacement-candidate-src --exclude=node_modules ./ _site/
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules source-app/ _site/integrated-workout/
           # The approved dark-teal marble redesign is the MYLIFTCOACH-2.0
           # source app. The workout-tracker branch is the old purple UI and
           # must not be used as the visual foundation for this preview.
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules source-app/ _site/redesign-integrated/
           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules coach-candidate/ _site/coach-live-test/
+           rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules replacement-candidate-src/ _site/replacement-candidate/
 
           # The preview domain has no cloud access, so it cannot modify the
           # live app's Supabase records. Original GitHub Pages is untouched.
@@ -247,6 +269,35 @@ jobs:
           page.write_text(html)
           PYCOACH
 
+      - name: Apply isolated cloud-blocked replacement preview safety and revision hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYREPLACEMENT'
+          from pathlib import Path
+          from hashlib import sha256
+          import re
+          root=Path('_site/replacement-candidate')
+          page=root/'index.html'
+          html=page.read_text()
+          assert 'goal-program-calendar.js' in html and 'approved-visuals-manifest.js' in html
+          assert 'active-exercise-guide.js' in html and 'coach-periodization.js' in html
+          assert '<head>' in html and '<body>' in html
+          policy='<meta http-equiv="Content-Security-Policy" content="connect-src \'none\'; form-action \'none\'; frame-src \'none\'; object-src \'none\'">'
+          html=html.replace('<head>','<head>\n'+policy,1)
+          html=html.replace('<body>','<body>\n<div role="status" style="position:relative;z-index:99999;background:#082b31;color:#f4d69f;border-bottom:1px solid #c9a96b;padding:9px 12px;text-align:center;font:600 12px system-ui">COMBINED RELEASE CANDIDATE · APPROVED TEAL + COACH · CLOUD BLOCKED · NOT PRODUCTION</div>',1)
+          def revision(match):
+              rel=match.group(1)
+              asset=root/rel
+              if not asset.is_file(): raise RuntimeError('Missing candidate asset: '+str(asset))
+              return rel+'?v='+sha256(asset.read_bytes()).hexdigest()[:12]
+          html=re.sub(r'(?<=src="./)([^"?]+\.js)\?v=\d+',revision,html)
+          html=re.sub(r'(?<=href="./)([^"?]+\.css)\?v=\d+',revision,html)
+          page.write_text(html)
+          assert 'CLOUD BLOCKED' in html
+          assert re.search(r'app\.js\?v=[a-f0-9]{12}',html)
+          PYREPLACEMENT
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -293,6 +344,27 @@ jobs:
             sleep 10
           done
           echo "GitHub Pages deployment did not serve the integrated redesign."
+          exit 1
+
+      - name: Verify combined release-candidate iPhone test URL
+        shell: bash
+        env:
+          PAGES_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          url="${PAGES_URL%/}/replacement-candidate/"
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --location --silent --show-error --max-time 20 --output /tmp/replacement-preview.html "${url}index.html" &&
+               grep -Fq 'COMBINED RELEASE CANDIDATE' /tmp/replacement-preview.html &&
+               grep -Fq 'CLOUD BLOCKED' /tmp/replacement-preview.html &&
+               grep -Fq 'approved-visuals-manifest.js' /tmp/replacement-preview.html &&
+               grep -Eq 'app.js\?v=[a-f0-9]{12}' /tmp/replacement-preview.html; then
+              echo "Verified isolated replacement candidate: ${url}"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Candidate preview is not serving validated assets"
           exit 1
 
       - name: Verify separate Coach iPhone test URL
