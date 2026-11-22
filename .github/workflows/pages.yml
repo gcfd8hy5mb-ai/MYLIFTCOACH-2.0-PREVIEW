@@ -40,6 +40,10 @@ jobs:
           test -s assets/myliftcoach-mark.svg
           node --check coach-program-builder.js
           node --check app.js
+          node --check custom-workouts.js
+          node --test tests/coach-program-builder.test.cjs tests/coach-plan-preview.test.cjs tests/coach-save-custom.test.cjs
+          grep -Fq 'saveCoachDay' custom-workouts.js
+          grep -Fq 'onSaveDay:day=>' app.js
           grep -Fq 'theme-option-one.css' index.html
           grep -Fq 'coach-program-builder.js' index.html
           grep -Fq 'id="coaching"' index.html
@@ -74,6 +78,25 @@ jobs:
                   html=html.replace('<body>','<body>\n<div id="mlc2GuestPreviewNotice" style="position:relative;z-index:99998;background:#082b31;color:#f4d69f;border-bottom:1px solid #c9a96b;padding:9px 12px;text-align:center;font:600 12px system-ui">2.0 APPROVED TEAL REDESIGN · TEST BUILD · CLOUD DISABLED</div>',1)
               page.write_text(html)
           PY
+          # Avoid stale iPhone Safari JavaScript after each Coach integration batch.
+          python3 - <<'PYCACHE'
+          from pathlib import Path
+          from hashlib import sha256
+          import re
+          for name in ('integrated-workout', 'redesign-integrated'):
+              root=Path('_site')/name
+              page=root/'index.html'
+              html=page.read_text()
+              def bust(match):
+                  path=match.group(1)
+                  asset=root/path
+                  if not asset.is_file(): raise RuntimeError('Missing deployed asset '+str(asset))
+                  return path+'?v='+sha256(asset.read_bytes()).hexdigest()[:12]
+              html=re.sub(r'(?<![A-Za-z0-9_-])(?:\\./)?(coach-program-builder\\.js|custom-workouts\\.js|app\\.js|coach-migration\\.css)\\?v=\\d+',bust,html)
+              page.write_text(html)
+          PYCACHE
+          grep -Fq 'saveCoachDay' _site/redesign-integrated/custom-workouts.js
+          grep -Fq 'onSaveDay:day=>' _site/redesign-integrated/app.js
           touch _site/.nojekyll
           test -s _site/redesign-integrated/index.html
           test -s _site/redesign-integrated/exercise-catalog-344.js
@@ -112,7 +135,8 @@ jobs:
             if curl --fail --location --silent --show-error --max-time 20 --output /tmp/redesign-preview.html "${url}index.html" &&
                grep -Fq 'theme-option-one.css' /tmp/redesign-preview.html &&
                grep -Fq 'coach-program-builder.js' /tmp/redesign-preview.html &&
-               grep -Fq '2.0 APPROVED TEAL REDESIGN' /tmp/redesign-preview.html; then
+               grep -Fq '2.0 APPROVED TEAL REDESIGN' /tmp/redesign-preview.html &&
+               grep -Eq 'coach-program-builder.js\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html; then
               echo "Verified integrated redesign: ${url}"
               exit 0
             fi
