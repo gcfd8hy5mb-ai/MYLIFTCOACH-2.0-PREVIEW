@@ -58,6 +58,9 @@ jobs:
           test -s coach-candidate/coach-preferences.js
           grep -Fq 'coachAutoPreferences' coach-candidate/index.html
           node --test coach-candidate/tests/coach-autonomous-preferences.test.cjs
+          test -s coach-candidate/calorie-goal-estimate.js
+          grep -Fq 'id="calorieGoalForm"' coach-candidate/index.html
+          node --test coach-candidate/tests/calorie-goal-estimate.test.cjs
           grep -Fq 'personal history only' coach-candidate/app.js
           grep -Fq 'isCoachTestPreview()' coach-candidate/app.js
           grep -Fq 'applyCoachWeight(id)' coach-candidate/app.js
