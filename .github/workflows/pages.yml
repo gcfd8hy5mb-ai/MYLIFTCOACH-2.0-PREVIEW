@@ -96,7 +96,7 @@ jobs:
               return f'{asset}?v={stamp}'
           s=re.sub(r'(workouts-tabs-n\.css|exercise-instruction-coverage\.js|progress-compact\.css|progress-compact\.js)\?v=\d+',bust,s)
 
-          banner = """<aside style="position:relative;z-index:99999;background:#092d30;color:#f9d9a0;border-bottom:1px solid #c3a76f;padding:8px 13px;text-align:center;font:600 12px system-ui">TEST BUILD · No cloud connections. Use demo workouts only. Changes here do not affect your live app.</aside>"""
+          banner = """<aside style="position:relative;z-index:99999;background:#092d30;color:#f9d9a0;border-bottom:1px solid #c3a76f;padding:8px 13px;text-align:center;font:600 12px system-ui">TEST BUILD · PROGRESS TABS V2 · No cloud connections. Demo workouts only. Live app unchanged.</aside>"""
           s=s.replace('<body>','<body>\n'+banner,1)
           p.write_text(s)
           PY
@@ -145,7 +145,7 @@ jobs:
             if curl --fail --silent --show-error --max-time 10 "$url" | grep -q 'Workouts Sandbox' \
               && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.html" | grep -q 'Quick Exercise Guide' \
               && curl --fail --silent --show-error --max-time 10 "${url}exercise-guide-demo.js" | grep -q 'MLC2_EXERCISE_CATALOG' \
-              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/index.html" | grep -q 'TEST BUILD' \
+              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/index.html" | grep -q 'PROGRESS TABS V2' \
               && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/active-exercise-guide.js" | grep -q 'View Full Guide' \
               && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/workouts-tabs-n.css" | grep -q 'background:#04252d!important' \
               && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/exercise-instruction-coverage.js" | grep -q 'const groups=new Map()' \
