@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const root='https://raw.githubusercontent.com/gcfd8hy5mb-ai/MYLIFTCOACH-2.0/feature/344-approved-exercise-visuals/';
+const root='https://raw.githubusercontent.com/gcfd8hy5mb-ai/MYLIFTCOACH-2.0/ee61b73185cb76b5d02c77502f7a4737050b3d82/';
 const placeholder=root+'assets/image-coming-approved.webp';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
