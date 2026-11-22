@@ -1,0 +1,64 @@
+name: Deploy MYLIFTCOACH Preview (independent repository)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: preview-only-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check independent preview safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s workouts-visual-preview.css
+          test -s workouts-sandbox.css
+          test -s workouts-sandbox.js
+          node --check workouts-sandbox.js
+          grep -q "connect-src 'none'" index.html
+          ! grep -Ei 'localStorage|sessionStorage|indexedDB|fetch\\(|XMLHttpRequest|supabase|serviceWorker|sendBeacon' workouts-sandbox.js
+          ! test -e app.js
+          ! test -e sync/automatic-workouts.js
+          grep -q 'Workouts Sandbox' index.html
+      - name: Package preview-only website
+        run: |
+          set -euo pipefail
+          mkdir -p _site/assets
+          cp index.html workouts-visual-preview.css workouts-sandbox.css workouts-sandbox.js _site/
+          cp assets/approved-vertical-marble-sharp.webp _site/assets/
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - uses: actions/deploy-pages@v4
+        id: deploy
+      - name: Verify Preview page after deployment
+        env:
+          PAGES_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          url="${PAGES_URL%/}/"
+          for i in 1 2 3 4 5; do
+            if curl --fail --silent --show-error --max-time 10 "$url" | grep -q 'Workouts Sandbox'; then
+              echo "Standalone preview verified: $url"
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
