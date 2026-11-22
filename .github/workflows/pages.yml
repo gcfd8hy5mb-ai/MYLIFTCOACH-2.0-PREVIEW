@@ -57,7 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           cd source-app
-          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs
+          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs tests/exercise-instruction-depth.test.cjs
           test -s assets/image-coming-approved.webp
           test -s active-exercise-guide.css
           test -s active-exercise-guide.js
@@ -105,6 +105,7 @@ jobs:
           test -s _site/integrated-workout/active-exercise-guide.js
           test -s _site/integrated-workout/approved-visuals-manifest.js
           test -s _site/integrated-workout/exercise-instruction-coverage.js
+          test -s _site/integrated-workout/exercise-instruction-depth.js
           grep -q '#124b4f,#063039' _site/integrated-workout/workouts-tabs-n.css
           grep -q 'const groups=new Map()' _site/integrated-workout/exercise-instruction-coverage.js
           grep -q 'exercise-instruction-coverage.js?v=' _site/integrated-workout/index.html
@@ -141,7 +142,8 @@ jobs:
               && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/index.html" | grep -q 'TEST BUILD' \
               && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/active-exercise-guide.js" | grep -q 'View Full Guide' \
               && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/workouts-tabs-n.css" | grep -q '#124b4f,#063039' \
-              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/exercise-instruction-coverage.js" | grep -q 'const groups=new Map()'; then
+              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/exercise-instruction-coverage.js" | grep -q 'const groups=new Map()' \
+              && curl --fail --silent --show-error --max-time 10 "${url}integrated-workout/exercise-instruction-depth.js" | grep -q 'revisions.length!==92'; then
               echo "Independent preview and interactive guide verified: $url"
               exit 0
             fi
