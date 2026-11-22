@@ -11,14 +11,11 @@ permissions:
 
 concurrency:
   group: preview-only-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  deploy-preview:
+  build-preview:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - name: Check independent preview safety
@@ -57,12 +54,24 @@ jobs:
           test "$(find _site/images -name '*.png' | wc -l)" -eq 14
           cp assets/approved-vertical-marble-sharp.webp _site/assets/
           touch _site/.nojekyll
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload exact Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
+          name: github-pages
           path: _site
-      - uses: actions/deploy-pages@v4
+
+  deploy-preview:
+    needs: build-preview
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy verified preview artifact
+        uses: actions/deploy-pages@v4
         id: deploy
+        with:
+          artifact_name: github-pages
       - name: Verify Preview page after deployment
         env:
           PAGES_URL: ${{ steps.deploy.outputs.page_url }}
