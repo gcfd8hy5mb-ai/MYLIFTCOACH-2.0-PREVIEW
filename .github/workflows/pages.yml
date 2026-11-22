@@ -378,7 +378,7 @@ jobs:
             if curl --fail --location --silent --show-error --max-time 20 --output /tmp/coach-live-test.html "${url}index.html" &&
                grep -Fq 'live-coach-workout.css' /tmp/coach-live-test.html &&
                grep -Fq 'COACH TEST' /tmp/coach-live-test.html &&
-               grep -Eq 'app.js\\?v=[a-f0-9]{12}' /tmp/coach-live-test.html &&
+               grep -Eq 'app[.]js[?]v=[a-f0-9]{12}' /tmp/coach-live-test.html &&
                curl --fail --location --silent --show-error --max-time 20 --output /tmp/coach-live-app.js "${url}app.js" &&
                grep -Fq 'SIMULATED COACH TEST DATA' /tmp/coach-live-app.js &&
                grep -Fq 'generatePreviewCoachHistory(plan)' /tmp/coach-live-app.js; then
