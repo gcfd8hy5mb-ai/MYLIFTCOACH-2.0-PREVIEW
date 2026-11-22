@@ -46,6 +46,8 @@ jobs:
           grep -Fq 'saveCoachDay' custom-workouts.js
           grep -Fq 'custom.find(p=>!p.coachSaved)' weekly-workout-schedule.js
           grep -Fq 'coachSaved:existing?.coachSaved===true' custom-workouts.js
+          grep -Fq 'View approved exercise demonstration' app.js
+          grep -Fq 'id="approvedMediaStatus"' index.html
           grep -Fq 'onSaveDay:day=>' app.js
           grep -Fq 'theme-option-one.css' index.html
           grep -Fq 'coach-program-builder.js' index.html
@@ -95,7 +97,7 @@ jobs:
                   asset=root/path
                   if not asset.is_file(): raise RuntimeError('Missing deployed asset '+str(asset))
                   return path+'?v='+sha256(asset.read_bytes()).hexdigest()[:12]
-              html=re.sub(r'(?<![A-Za-z0-9_-])(?:\\./)?(coach-program-builder\\.js|custom-workouts\\.js|app\\.js|coach-migration\\.css)\\?v=\\d+',bust,html)
+              html=re.sub(r'(?<![A-Za-z0-9_-])(?:\\./)?(coach-program-builder\\.js|custom-workouts\\.js|app\\.js|coach-migration\\.css|exercise-placeholders\\.css)\\?v=\\d+',bust,html)
               page.write_text(html)
           PYCACHE
           grep -Fq 'saveCoachDay' _site/redesign-integrated/custom-workouts.js
@@ -115,6 +117,9 @@ jobs:
           test -s _site/redesign-integrated/exercise-visuals-344.js
           test -s _site/redesign-integrated/assets/exercise-demonstrations/machine-chest-press-r2.webp
           grep -Fq 'coachSaved:existing?.coachSaved===true' _site/redesign-integrated/custom-workouts.js
+          grep -Fq 'View approved exercise demonstration' _site/redesign-integrated/app.js
+          grep -Fq 'approvedMediaStatus' _site/redesign-integrated/index.html
+          test -s _site/redesign-integrated/exercise-placeholders.css
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
