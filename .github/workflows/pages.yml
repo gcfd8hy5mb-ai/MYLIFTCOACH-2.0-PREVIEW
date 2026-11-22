@@ -32,6 +32,10 @@ jobs:
           test -s exercise-images.html
           test -s exercise-images.js
           test -s exercise-images.css
+          test -s exercise-visuals-344-preview.html
+          test -s exercise-visuals-344-preview.js
+          test -s exercise-visuals-344-preview.css
+          node --check exercise-visuals-344-preview.js
           node --check exercise-images.js
           node --check workouts-sandbox.js
           grep -q "connect-src 'none'" index.html
@@ -45,6 +49,7 @@ jobs:
           mkdir -p _site/assets
           cp index.html workouts-visual-preview.css workouts-sandbox.css workouts-sandbox.js _site/
           cp exercise-images.html exercise-images.js exercise-images.css _site/
+          cp exercise-visuals-344-preview.html exercise-visuals-344-preview.js exercise-visuals-344-preview.css _site/
           mkdir -p _site/images
           cp images/*.png _site/images/
           test "$(find _site/images -name '*.png' | wc -l)" -eq 14
