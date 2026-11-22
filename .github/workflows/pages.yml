@@ -114,6 +114,8 @@ jobs:
           grep -q 'training volume' _site/integrated-workout/progress-migration.js
           grep -q "source:'empty'" _site/integrated-workout/workout-active-ux.js
           grep -q 'volumeTotal(x.sets)' _site/integrated-workout/app.js
+          grep -q 'renderVolumeAudit' _site/integrated-workout/progress-migration.js
+          grep -q 'progressVolumeAudit' _site/integrated-workout/progress-compact.js
           grep -Eq 'progress-migration.js\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
           grep -Eq 'workout-active-ux.js\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
           grep -Eq 'app.js\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
@@ -176,7 +178,8 @@ jobs:
               && grep -Fq 'progress-compact-panel' "$tmp/integrated-workout_progress-compact.css" \
               && grep -Fq 'sum of weight × reps from your completed sets' "$tmp/integrated-workout_progress-migration.js" \
               && grep -Fq "source:'empty'" "$tmp/integrated-workout_workout-active-ux.js" \
-              && grep -Fq 'volumeTotal(x.sets)' "$tmp/integrated-workout_app.js"; then
+              && grep -Fq 'volumeTotal(x.sets)' "$tmp/integrated-workout_app.js" \
+              && grep -Fq 'function renderVolumeAudit(' "$tmp/integrated-workout_progress-migration.js"; then
               echo "Published integrated Progress V2 and exercise guide verified: ${url}integrated-workout/"
               exit 0
             fi
