@@ -76,13 +76,29 @@ jobs:
               if name=='redesign-integrated':
                   assert 'mlc2IntegrationScreen' in html
                   assert 'mlc2ExerciseSearch' in html
+                  html=html.replace('<body>','<body>\n<div id="mlc2GuestPreviewNotice" style="position:relative;z-index:99998;background:#082b31;color:#f4d69f;border-bottom:1px solid #c9a96b;padding:9px 12px;text-align:center;font:600 12px system-ui">2.0 REDESIGN TEST · GUEST INSPECTION · NO CLOUD CONNECTION</div>',1)
               page.write_text(html)
+          # This isolated test origin has no cloud access. Prevent the copied
+          # production login gate from blocking guest-only visual inspection.
+          # Never change the original redesign branch's account-ui.js.
+          python3 - <<'PYAUTHPREVIEW'
+          from pathlib import Path
+          p=Path('_site/redesign-integrated/persistence/account-ui.js')
+          src=p.read_text()
+          old="if(!manager.owner){showAuthGate();document.documentElement.classList.remove('prism-account-booting');return;}"
+          replacement="if(!manager.owner){document.documentElement.classList.remove('prism-account-booting');return;}"
+          assert src.count(old)==1, 'Preview auth gate marker changed: abort rather than weaken login unexpectedly'
+          p.write_text(src.replace(old,replacement,1))
+          assert 'showAuthGate();document.documentElement' not in p.read_text()
+          PYAUTHPREVIEW
           PY
           touch _site/.nojekyll
           test -s _site/redesign-integrated/index.html
           test -s _site/redesign-integrated/integrations/mlc2/redesign-bridge.js
           test -s _site/redesign-integrated/integrations/mlc2/exercise-catalog-344.js
           test -s _site/redesign-integrated/integrations/mlc2/coach-program-builder.js
+          grep -Fq 'mlc2GuestPreviewNotice' _site/redesign-integrated/index.html
+          ! grep -Fq "if(!manager.owner){showAuthGate();" _site/redesign-integrated/persistence/account-ui.js
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -110,7 +126,8 @@ jobs:
           for attempt in 1 2 3 4 5; do
             if curl --fail --location --silent --show-error --max-time 20 --output /tmp/redesign-preview.html "${url}index.html" &&
                grep -Fq 'mlc2IntegrationScreen' /tmp/redesign-preview.html &&
-               grep -Fq 'mlc2ExerciseSearch' /tmp/redesign-preview.html; then
+               grep -Fq 'mlc2ExerciseSearch' /tmp/redesign-preview.html &&
+               grep -Fq 'mlc2GuestPreviewNotice' /tmp/redesign-preview.html; then
               echo "Verified integrated redesign: ${url}"
               exit 0
             fi
