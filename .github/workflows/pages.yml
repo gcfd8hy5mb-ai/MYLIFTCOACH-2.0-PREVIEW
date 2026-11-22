@@ -46,6 +46,8 @@ jobs:
           test -s coach-candidate/live-coach-workout.css
           grep -Fq 'liveCoachPreview(plan)' coach-candidate/app.js
           grep -Fq 'liveCoachFeedback(id)' coach-candidate/app.js
+          grep -Fq 'live-coach-details' coach-candidate/app.js
+          grep -Fq "hasKnownWeight?defaults.weight:''" coach-candidate/app.js
           node --check coach-candidate/app.js
           node --test coach-candidate/tests/coach-live-workout.test.cjs
 
