@@ -55,6 +55,9 @@ jobs:
           grep -Fq 'coachAutonomousPlan()' coach-candidate/app.js
           grep -Fq 'id="coachAutoPanel"' coach-candidate/index.html
           node --test coach-candidate/tests/coach-autonomous-proposal.test.cjs
+          test -s coach-candidate/coach-preferences.js
+          grep -Fq 'coachAutoPreferences' coach-candidate/index.html
+          node --test coach-candidate/tests/coach-autonomous-preferences.test.cjs
           grep -Fq 'personal history only' coach-candidate/app.js
           grep -Fq 'isCoachTestPreview()' coach-candidate/app.js
           grep -Fq 'applyCoachWeight(id)' coach-candidate/app.js
