@@ -57,10 +57,11 @@ jobs:
         run: |
           set -euo pipefail
           cd source-app
-          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs tests/exercise-instruction-depth.test.cjs tests/progress-compact.test.cjs tests/progress-real-volume.test.cjs tests/preview-persistence.test.cjs
+          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs tests/exercise-instruction-depth.test.cjs tests/progress-compact.test.cjs tests/progress-real-volume.test.cjs tests/preview-persistence.test.cjs tests/coach-plan-preview.test.cjs
           node --check exercise-instruction-depth.js
           node --check progress-compact.js
           node --check active-exercise-guide.js
+          node --check coach-plan-preview.js
           test -s assets/image-coming-approved.webp
           test -s active-exercise-guide.css
           test -s active-exercise-guide.js
@@ -100,7 +101,7 @@ jobs:
               if not file.exists(): return m.group(0)
               stamp=sha256(file.read_bytes()).hexdigest()[:12]
               return f'{asset}?v={stamp}'
-          s=re.sub(r'(workouts-tabs-n\.css|exercise-instruction-coverage\.js|progress-compact\.css|progress-compact\.js|progress-migration\.js|workout-active-ux\.js|app\.js)\?v=\d+',bust,s)
+          s=re.sub(r'(workouts-tabs-n\.css|exercise-instruction-coverage\.js|progress-compact\.css|progress-compact\.js|progress-migration\.js|workout-active-ux\.js|coach-migration\.css|coach-plan-preview\.js|app\.js)\?v=\d+',bust,s)
 
           banner = """<aside style="position:relative;z-index:99999;background:#092d30;color:#f9d9a0;border-bottom:1px solid #c3a76f;padding:8px 13px;text-align:center;font:600 12px system-ui">TEST BUILD · PROGRESS TABS V2 · Local Safari demo storage only. Live app unchanged.</aside>"""
           s=s.replace('<body>','<body>\n'+banner+'\n<section id="mlc-preview-persistence" style="position:relative;z-index:99999;background:#072e33;padding:12px;text-align:center;border-bottom:1px solid #9c865b"></section>',1)
@@ -114,6 +115,8 @@ jobs:
           test -s _site/integrated-workout/exercise-instruction-coverage.js
           test -s _site/integrated-workout/exercise-instruction-depth.js
           test -s _site/integrated-workout/progress-compact.js
+          test -s _site/integrated-workout/coach-plan-preview.js
+          grep -Fq 'coachPlanPreview' _site/integrated-workout/index.html
           test -s _site/integrated-workout/progress-compact.css
           test -s _site/integrated-workout/preview-guest-backup.js
           grep -Fq 'Test saving across visits' _site/integrated-workout/preview-guest-backup.js
@@ -166,7 +169,7 @@ jobs:
           # closes stdout early and triggers curl 23 under pipefail.
           for i in 1 2 3 4 5; do
             success=true
-            for file in index.html exercise-guide-demo.html exercise-guide-demo.js integrated-workout/index.html integrated-workout/active-exercise-guide.js integrated-workout/workouts-tabs-n.css integrated-workout/exercise-instruction-coverage.js integrated-workout/exercise-instruction-depth.js integrated-workout/progress-compact.js integrated-workout/progress-compact.css integrated-workout/preview-guest-backup.js integrated-workout/progress-migration.js integrated-workout/workout-active-ux.js integrated-workout/app.js; do
+            for file in index.html exercise-guide-demo.html exercise-guide-demo.js integrated-workout/index.html integrated-workout/active-exercise-guide.js integrated-workout/workouts-tabs-n.css integrated-workout/exercise-instruction-coverage.js integrated-workout/exercise-instruction-depth.js integrated-workout/progress-compact.js integrated-workout/progress-compact.css integrated-workout/preview-guest-backup.js integrated-workout/coach-plan-preview.js integrated-workout/progress-migration.js integrated-workout/workout-active-ux.js integrated-workout/app.js; do
               if ! curl --fail --location --silent --show-error --max-time 25 --output "$tmp/${file//\//_}" "${url}${file}"; then
                 echo "Could not fetch ${file} on attempt ${i}"
                 success=false
@@ -189,7 +192,8 @@ jobs:
               && grep -Fq 'volumeTotal(x.sets)' "$tmp/integrated-workout_app.js" \
               && grep -Fq 'function renderVolumeAudit(' "$tmp/integrated-workout_progress-migration.js" \
               && grep -Fq 'Save demo backup' "$tmp/integrated-workout_preview-guest-backup.js" \
-              && grep -Fq 'Test saving across visits' "$tmp/integrated-workout_preview-guest-backup.js"; then
+              && grep -Fq 'Test saving across visits' "$tmp/integrated-workout_preview-guest-backup.js" \
+              && grep -Fq 'isCustom' "$tmp/integrated-workout_coach-plan-preview.js"; then
               echo "Published integrated Progress V2 and exercise guide verified: ${url}integrated-workout/"
               exit 0
             fi
