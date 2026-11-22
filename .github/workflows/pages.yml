@@ -253,3 +253,22 @@ jobs:
           done
           echo "GitHub Pages deployment did not serve the integrated redesign."
           exit 1
+
+      - name: Verify separate Coach iPhone test URL
+        shell: bash
+        env:
+          PAGES_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          url="${PAGES_URL%/}/coach-live-test/"
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --location --silent --show-error --max-time 20 --output /tmp/coach-live-test.html "${url}index.html" &&
+               grep -Fq 'live-coach-workout.css' /tmp/coach-live-test.html &&
+               grep -Fq 'COACH TEST' /tmp/coach-live-test.html; then
+              echo "Verified isolated Coach test: ${url}"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Isolated Coach test URL is not serving required assets."
+          exit 1
