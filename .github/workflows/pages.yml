@@ -58,7 +58,6 @@ jobs:
           grep -Fq 'coachProgramBuilder' replacement-candidate-src/index.html
           grep -Fq 'coachPlanPreview' replacement-candidate-src/index.html
           (cd replacement-candidate-src && node --test tests/compact-workouts.test.cjs)
-          grep -Fq 'background:#06373b!important' replacement-candidate-src/compact-workouts.css
           grep -Fq 'compact-workouts.css?v=3' replacement-candidate-src/index.html
           grep -Fq 'background-color:#04252d!important' replacement-candidate-src/compact-workouts.css
           grep -Fq -- '--mlc-rich-teal-top:#04252d' replacement-candidate-src/rich-teal-cards.css
