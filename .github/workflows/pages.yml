@@ -26,18 +26,15 @@ jobs:
           repository: gcfd8hy5mb-ai/MYLIFTCOACH-2.0
           ref: feature/344-approved-exercise-visuals
           path: source-app
-          # A private cross-repository checkout needs an explicit read-only token.
-          # Add MLC2_PREVIEW_SOURCE_TOKEN to this preview repository's Actions secrets.
-          # Public source repositories continue working with github.token.
-          token: ${{ secrets.MLC2_PREVIEW_SOURCE_TOKEN || github.token }}
+          # Source and preview are public repositories; checkout needs no extra secret.
           persist-credentials: false
 
-      - name: Explain unavailable source checkout
+      - name: Source checkout diagnostics
         if: failure()
         shell: bash
         run: |
-          echo "::error::If checkout of MYLIFTCOACH-2.0 failed, verify the branch exists and configure an Actions secret named MLC2_PREVIEW_SOURCE_TOKEN with read-only Contents access to the source repository. Do not publish to workout-tracker."
-          
+          echo "::error::MYLIFTCOACH development checkout failed. Both repositories are public. Verify the feature/344-approved-exercise-visuals branch and GitHub Actions access. Stable workout-tracker remains untouched."
+
       - name: Validate actual approved teal redesign source
         shell: bash
         run: |
