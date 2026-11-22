@@ -55,7 +55,7 @@ jobs:
           test -s replacement-candidate-src/coach-periodization.js
           test -s replacement-candidate-src/goal-program-adherence.js
           test -s replacement-candidate-src/sync/aux-data.js
-          (cd replacement-candidate-src && node tests/replacement-media-merge.test.cjs && node tests/coach-program-cloud-backup.test.cjs && node tests/home-program-priority.test.cjs && node tests/combined-coach-panels.test.cjs && node tests/coach-consistent-history.test.cjs && node tests/today-program-labels.test.cjs && node tests/goal-program-adherence.test.cjs && node tests/program-rotation-scope.test.cjs && node tests/calorie-goal-estimate.test.cjs && node --check app.js)
+          (cd replacement-candidate-src && node tests/replacement-media-merge.test.cjs && node tests/coach-program-cloud-backup.test.cjs && node tests/home-program-priority.test.cjs && node tests/combined-coach-panels.test.cjs && node tests/coach-consistent-history.test.cjs && node tests/today-program-labels.test.cjs && node tests/goal-program-adherence.test.cjs && node tests/program-rotation-scope.test.cjs && node tests/calorie-goal-estimate.test.cjs && node tests/concurrent-workout-sync.test.cjs && node --check app.js)
           grep -Fq 'coachProgramBuilder' replacement-candidate-src/index.html
           grep -Fq 'coachPlanPreview' replacement-candidate-src/index.html
           grep -Fq 'name="heightFt"' replacement-candidate-src/index.html
