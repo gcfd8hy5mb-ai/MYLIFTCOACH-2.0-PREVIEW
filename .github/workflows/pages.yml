@@ -57,7 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           cd source-app
-          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs tests/exercise-instruction-depth.test.cjs tests/progress-compact.test.cjs
+          node --test tests/exercise-visuals-344.test.cjs tests/active-exercise-guide.test.cjs tests/exercise-instruction-coverage.test.cjs tests/exercise-instruction-depth.test.cjs tests/progress-compact.test.cjs tests/progress-real-volume.test.cjs
           node --check exercise-instruction-depth.js
           node --check progress-compact.js
           node --check active-exercise-guide.js
@@ -97,7 +97,7 @@ jobs:
               if not file.exists(): return m.group(0)
               stamp=sha256(file.read_bytes()).hexdigest()[:12]
               return f'{asset}?v={stamp}'
-          s=re.sub(r'(workouts-tabs-n\.css|exercise-instruction-coverage\.js|progress-compact\.css|progress-compact\.js)\?v=\d+',bust,s)
+          s=re.sub(r'(workouts-tabs-n\.css|exercise-instruction-coverage\.js|progress-compact\.css|progress-compact\.js|progress-migration\.js|workout-active-ux\.js|app\.js)\?v=\d+',bust,s)
 
           banner = """<aside style="position:relative;z-index:99999;background:#092d30;color:#f9d9a0;border-bottom:1px solid #c3a76f;padding:8px 13px;text-align:center;font:600 12px system-ui">TEST BUILD · PROGRESS TABS V2 · No cloud connections. Demo workouts only. Live app unchanged.</aside>"""
           s=s.replace('<body>','<body>\n'+banner,1)
@@ -111,6 +111,12 @@ jobs:
           test -s _site/integrated-workout/exercise-instruction-depth.js
           test -s _site/integrated-workout/progress-compact.js
           test -s _site/integrated-workout/progress-compact.css
+          grep -q 'training volume' _site/integrated-workout/progress-migration.js
+          grep -q "source:'empty'" _site/integrated-workout/workout-active-ux.js
+          grep -q 'volumeTotal(x.sets)' _site/integrated-workout/app.js
+          grep -Eq 'progress-migration.js\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
+          grep -Eq 'workout-active-ux.js\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
+          grep -Eq 'app.js\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
           grep -q 'recent-item:nth-child(n+6)' _site/integrated-workout/progress-compact.css
           grep -q "progress-compact.js" _site/integrated-workout/index.html
           grep -Eq 'progress-compact.js\?v=[a-f0-9]{12}' _site/integrated-workout/index.html
