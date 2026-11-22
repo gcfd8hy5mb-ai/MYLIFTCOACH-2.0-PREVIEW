@@ -69,6 +69,9 @@ jobs:
           grep -Fq 'name="programSource"' coach-candidate/index.html
           grep -Fq 'name="programCustom"' coach-candidate/index.html
           node --test coach-candidate/tests/goal-program-source.test.cjs
+          test -s coach-candidate/coach-periodization.js
+          grep -Fq 'phaseLabel' coach-candidate/app.js
+          node --test coach-candidate/tests/coach-periodization.test.cjs
           grep -Fq 'personal history only' coach-candidate/app.js
           grep -Fq 'isCoachTestPreview()' coach-candidate/app.js
           grep -Fq 'applyCoachWeight(id)' coach-candidate/app.js
