@@ -104,7 +104,7 @@ jobs:
                   asset=root/path
                   if not asset.is_file(): raise RuntimeError('Missing deployed asset '+str(asset))
                   return path+'?v='+sha256(asset.read_bytes()).hexdigest()[:12]
-              html=re.sub(r'(?<![A-Za-z0-9_-])(?:\\./)?(coach-program-builder\\.js|custom-workouts\\.js|app\\.js|coach-migration\\.css|exercise-placeholders\\.css|active-exercise-guide\\.css|active-exercise-guide\\.js|home-rebuild\\.css|workouts-tabs-n\\.css|workouts-tabs-n\\.js|custom-workouts\\.js|progress-weekly-summary\\.js|progress-weekly-summary\\.css|progress-compact\\.js)\\?v=\\d+',bust,html)
+              html=re.sub(r'(?<![A-Za-z0-9_-])(?:\./)?(coach-program-builder\.js|custom-workouts\.js|app\.js|coach-migration\.css|exercise-placeholders\.css|active-exercise-guide\.css|active-exercise-guide\.js|home-rebuild\.css|workouts-tabs-n\.css|workouts-tabs-n\.js|custom-workouts\.js|progress-weekly-summary\.js|progress-weekly-summary\.css|progress-compact\.js)\?v=\d+',bust,html)
               page.write_text(html)
           PYCACHE
           grep -Fq 'saveCoachDay' _site/redesign-integrated/custom-workouts.js
@@ -169,12 +169,12 @@ jobs:
                grep -Fq 'theme-option-one.css' /tmp/redesign-preview.html &&
                grep -Fq 'coach-program-builder.js' /tmp/redesign-preview.html &&
                grep -Fq '2.0 APPROVED TEAL REDESIGN' /tmp/redesign-preview.html &&
-               grep -Eq 'coach-program-builder.js\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
-               grep -Eq 'active-exercise-guide.js\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
-               grep -Eq 'home-rebuild.css\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
-               grep -Eq 'workouts-tabs-n.css\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
-               grep -Eq 'workouts-tabs-n.js\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
-               grep -Eq 'progress-weekly-summary.js\\?v=[a-f0-9]{12}' /tmp/redesign-preview.html; then
+               grep -Eq 'coach-program-builder.js\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
+               grep -Eq 'active-exercise-guide.js\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
+               grep -Eq 'home-rebuild.css\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
+               grep -Eq 'workouts-tabs-n.css\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
+               grep -Eq 'workouts-tabs-n.js\?v=[a-f0-9]{12}' /tmp/redesign-preview.html &&
+               grep -Eq 'progress-weekly-summary.js\?v=[a-f0-9]{12}' /tmp/redesign-preview.html; then
               echo "Verified integrated redesign: ${url}"
               exit 0
             fi
