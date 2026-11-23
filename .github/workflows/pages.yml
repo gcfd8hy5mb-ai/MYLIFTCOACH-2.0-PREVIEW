@@ -354,7 +354,7 @@ jobs:
           assert '<head>' in html and '<body>' in html
           assert 'app.js?v=42' in html
           assert (root/'offline-worker.js').is_file()
-          policy='<meta http-equiv="Content-Security-Policy" content="connect-src \\'none\\'; form-action \\'none\\'; frame-src \\'none\\'; object-src \\'none\\'">'
+          policy="""<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">"""
           html=html.replace('<head>','<head>\\n'+policy,1)
           banner='<div role="status" style="position:relative;z-index:99999;background:#082b31;color:#f4d69f;border-bottom:1px solid #c9a96b;padding:9px 12px;text-align:center;font:600 12px system-ui">CODEX REVIEWED MYLIFTCOACH 2.0 · TEST ONLY · CLOUD BLOCKED · ORIGINAL APP UNCHANGED</div>'
           html=html.replace('<body>','<body>\\n'+banner,1)
