@@ -355,26 +355,26 @@ jobs:
           assert 'app.js?v=42' in html
           assert (root/'offline-worker.js').is_file()
           policy="""<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">"""
-          html=html.replace('<head>','<head>\\n'+policy,1)
+          html=html.replace('<head>','<head>\n'+policy,1)
           banner='<div role="status" style="position:relative;z-index:99999;background:#082b31;color:#f4d69f;border-bottom:1px solid #c9a96b;padding:9px 12px;text-align:center;font:600 12px system-ui">CODEX REVIEWED MYLIFTCOACH 2.0 · TEST ONLY · CLOUD BLOCKED · ORIGINAL APP UNCHANGED</div>'
-          html=html.replace('<body>','<body>\\n'+banner,1)
+          html=html.replace('<body>','<body>\n'+banner,1)
           def revision(match):
               rel=match.group(1)
               asset=root/rel
               if not asset.is_file(): raise RuntimeError('Missing reviewed asset '+str(asset))
               return rel+'?v='+sha256(asset.read_bytes()).hexdigest()[:12]
-          html=re.sub(r'(?<=src="./)([^"?]+\\.js)\\?v=\\d+',revision,html)
-          html=re.sub(r'(?<=href="./)([^"?]+\\.css)\\?v=\\d+',revision,html)
+          html=re.sub(r'(?<=src="./)([^"?]+\.js)\?v=\d+',revision,html)
+          html=re.sub(r'(?<=href="./)([^"?]+\.css)\?v=\d+',revision,html)
           page.write_text(html)
           assert 'CLOUD BLOCKED' in html
-          assert re.search(r'app\\.js\\?v=[a-f0-9]{12}',html)
+          assert re.search(r'app\.js\?v=[a-f0-9]{12}',html)
           PYREVIEWED
 
       - name: Check out pinned More and marble visual review
         uses: actions/checkout@v4
         with:
           repository: gcfd8hy5mb-ai/MYLIFTCOACH-2.0
-          ref: d96df8885fd34cdfba89ea7d375fe8453834496c
+          ref: 949bb6219f01e74e42314711ef11368291eb6774
           path: more-visual-src
           persist-credentials: false
 
