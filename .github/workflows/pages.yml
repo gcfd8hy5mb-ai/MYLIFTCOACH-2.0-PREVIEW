@@ -401,6 +401,38 @@ jobs:
           page.write_text(html)
           PYMORE
 
+      - name: Check out pinned standalone iPhone build
+        uses: actions/checkout@v4
+        with:
+          repository: gcfd8hy5mb-ai/MYLIFTCOACH-2.0
+          ref: b618096f162b5e9564d66aa50cb1238446811573
+          path: status-bar-src
+          persist-credentials: false
+
+      - name: Test and package independent standalone iPhone preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd status-bar-src && node tests/run-all.js)
+          mkdir -p _site/iphone-status-bar
+          rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules status-bar-src/ _site/iphone-status-bar/
+          python3 - <<'PYMORE'
+          from pathlib import Path
+          root = Path('_site/iphone-status-bar')
+          page = root / 'index.html'
+          html = page.read_text()
+          assert 'more-page.css?v=2' in html
+          assert 'black-translucent' in html
+          assert (root/'app.webmanifest').is_file()
+          assert 'rich-teal-cards.css?v=8' in html
+          assert 'app.js?v=43' in html
+          assert (root / 'assets/approved-vertical-marble-sharp.webp').is_file()
+          policy = """<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">"""
+          html = html.replace('<head>', '<head>\n' + policy + '\n<meta name="robots" content="noindex">', 1)
+          html = html.replace('MYLIFTCOACH 2.0 · iPhone beta', 'MYLIFTCOACH 2.0 · iPhone status-bar preview · Cloud access blocked')
+          page.write_text(html)
+          PYMORE
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
