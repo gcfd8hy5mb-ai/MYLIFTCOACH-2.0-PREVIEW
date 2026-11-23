@@ -45,6 +45,28 @@ jobs:
           path: replacement-candidate-src
           persist-credentials: false
 
+      - name: Check out Codex-reviewed 2.0 candidate
+        uses: actions/checkout@v4
+        with:
+          repository: gcfd8hy5mb-ai/MYLIFTCOACH-2.0
+          ref: review/codex-final-integration-20261122
+          path: reviewed-2-0-src
+          persist-credentials: false
+
+      - name: Verify reviewed 2.0 source before packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd reviewed-2-0-src
+          test -s CODEX-FINAL-REVIEW-RESULTS.md
+          test -s offline-worker.js
+          test -s offline-shell.js
+          test -s approved-visuals-manifest.js
+          grep -Fq 'app.js?v=42' index.html
+          node --check app.js
+          node --check offline-worker.js
+          node tests/run-all.js
+
       - name: Verify combined Coach and approved artwork before packaging
         shell: bash
         run: |
@@ -316,6 +338,38 @@ jobs:
           assert re.search(r'app\.js\?v=[a-f0-9]{12}',html)
           PYREPLACEMENT
 
+      - name: Package separate Codex-reviewed iPhone candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site/reviewed-2-0
+          rsync -a --exclude=.git --exclude=.github --exclude=tests --exclude=node_modules reviewed-2-0-src/ _site/reviewed-2-0/
+          python3 - <<'PYREVIEWED'
+          from pathlib import Path
+          from hashlib import sha256
+          import re
+          root=Path('_site/reviewed-2-0')
+          page=root/'index.html'
+          html=page.read_text()
+          assert '<head>' in html and '<body>' in html
+          assert 'app.js?v=42' in html
+          assert (root/'offline-worker.js').is_file()
+          policy='<meta http-equiv="Content-Security-Policy" content="connect-src \\'none\\'; form-action \\'none\\'; frame-src \\'none\\'; object-src \\'none\\'">'
+          html=html.replace('<head>','<head>\\n'+policy,1)
+          banner='<div role="status" style="position:relative;z-index:99999;background:#082b31;color:#f4d69f;border-bottom:1px solid #c9a96b;padding:9px 12px;text-align:center;font:600 12px system-ui">CODEX REVIEWED MYLIFTCOACH 2.0 · TEST ONLY · CLOUD BLOCKED · ORIGINAL APP UNCHANGED</div>'
+          html=html.replace('<body>','<body>\\n'+banner,1)
+          def revision(match):
+              rel=match.group(1)
+              asset=root/rel
+              if not asset.is_file(): raise RuntimeError('Missing reviewed asset '+str(asset))
+              return rel+'?v='+sha256(asset.read_bytes()).hexdigest()[:12]
+          html=re.sub(r'(?<=src="./)([^"?]+\\.js)\\?v=\\d+',revision,html)
+          html=re.sub(r'(?<=href="./)([^"?]+\\.css)\\?v=\\d+',revision,html)
+          page.write_text(html)
+          assert 'CLOUD BLOCKED' in html
+          assert re.search(r'app\\.js\\?v=[a-f0-9]{12}',html)
+          PYREVIEWED
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -383,6 +437,28 @@ jobs:
             sleep 10
           done
           echo "Candidate preview is not serving validated assets"
+          exit 1
+
+      - name: Verify Codex-reviewed 2.0 iPhone URL
+        shell: bash
+        env:
+          PAGES_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          url="${PAGES_URL%/}/reviewed-2-0/"
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --location --silent --show-error --max-time 20 --output /tmp/reviewed-2-0.html "${url}index.html" &&
+               grep -Fq 'CODEX REVIEWED MYLIFTCOACH 2.0' /tmp/reviewed-2-0.html &&
+               grep -Fq 'CLOUD BLOCKED' /tmp/reviewed-2-0.html &&
+               grep -Eq 'app.js\\?v=[a-f0-9]{12}' /tmp/reviewed-2-0.html &&
+               curl --fail --location --silent --show-error --max-time 20 --output /tmp/reviewed-worker.js "${url}offline-worker.js" &&
+               grep -Fq 'myliftcoach2-shell' /tmp/reviewed-worker.js; then
+              echo "Verified reviewed 2.0 iPhone candidate: ${url}"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Codex-reviewed iPhone test site is not serving validated assets"
           exit 1
 
       - name: Verify separate Coach iPhone test URL
