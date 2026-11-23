@@ -374,7 +374,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: gcfd8hy5mb-ai/MYLIFTCOACH-2.0
-          ref: 949bb6219f01e74e42314711ef11368291eb6774
+          ref: 496cc75c1f20cfea3df1b725baa4495173680d88
           path: more-visual-src
           persist-credentials: false
 
@@ -390,13 +390,14 @@ jobs:
           root = Path('_site/more-marble')
           page = root / 'index.html'
           html = page.read_text()
-          assert 'more-page.css?v=1' in html
+          assert 'more-page.css?v=2' in html
           assert 'black-translucent' in html
+          assert 'rich-teal-cards.css?v=7' in html
           assert 'app.js?v=43' in html
           assert (root / 'assets/approved-vertical-marble-sharp.webp').is_file()
           policy = """<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">"""
           html = html.replace('<head>', '<head>\n' + policy + '\n<meta name="robots" content="noindex">', 1)
-          html = html.replace('MYLIFTCOACH 2.0 · iPhone beta', 'MYLIFTCOACH 2.0 · More and marble preview · Cloud access blocked')
+          html = html.replace('MYLIFTCOACH 2.0 · iPhone beta', 'MYLIFTCOACH 2.0 · Marble seam review · Cloud access blocked')
           page.write_text(html)
           PYMORE
 
@@ -416,7 +417,7 @@ jobs:
         uses: actions/deploy-pages@v4
         id: deploy
 
-      - name: Verify the More and marble preview URL
+      - name: Verify the Marble seam review URL
         shell: bash
         env:
           PAGES_URL: ${{ steps.deploy.outputs.page_url }}
@@ -425,9 +426,9 @@ jobs:
           url="${PAGES_URL%/}/more-marble"
           for attempt in 1 2 3 4 5; do
             if curl --retry 2 -fsSL --max-time 20 "$url/index.html" -o /tmp/more-marble.html &&
-               grep -Fq 'More and marble preview' /tmp/more-marble.html &&
+               grep -Fq 'Marble seam review' /tmp/more-marble.html &&
                grep -Fq "connect-src 'none'" /tmp/more-marble.html &&
-               curl -fsSL --max-time 20 "$url/more-page.css?v=1" -o /tmp/more-page.css &&
+               curl -fsSL --max-time 20 "$url/more-page.css?v=2" -o /tmp/more-page.css &&
                grep -Fq '.more-section' /tmp/more-page.css; then
               echo "Verified More and marble iPhone preview at $url/"
               exit 0
